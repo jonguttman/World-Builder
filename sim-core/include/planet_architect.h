@@ -29,6 +29,10 @@ const uint8_t* pa_sim_snapshot_ocean_mask(PASimHandle handle);
 uint32_t pa_sim_snapshot_biodiversity(PASimHandle handle);
 const char* pa_sim_snapshot_species_json(PASimHandle handle);
 
+// --- Objective Evaluation ---
+double pa_sim_snapshot_total_biomass(PASimHandle handle);
+const char* pa_sim_evaluate_objective(PASimHandle handle, const char* objective_json);
+
 // --- Species ---
 void pa_sim_add_species_json(PASimHandle handle, const char* json, double initial_pop);
 

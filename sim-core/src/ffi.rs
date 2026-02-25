@@ -18,6 +18,7 @@ pub struct SimHandle {
     population_cache: Vec<f32>,
     ocean_cache: Vec<u8>,
     species_json_cache: CString,
+    objective_result_cache: CString,
 }
 
 impl SimHandle {
@@ -31,6 +32,7 @@ impl SimHandle {
             population_cache: vec![0.0; tile_count],
             ocean_cache: vec![0; tile_count],
             species_json_cache: CString::new("[]").unwrap(),
+            objective_result_cache: CString::new("{}").unwrap(),
         };
         handle.update_cache();
         handle
@@ -170,6 +172,67 @@ pub extern "C" fn pa_sim_snapshot_species_json(handle: *mut SimHandle) -> *const
     if handle.is_null() { return ptr::null(); }
     let h = unsafe { &*handle };
     h.species_json_cache.as_ptr()
+}
+
+// --- Objective Evaluation ---
+
+#[no_mangle]
+pub extern "C" fn pa_sim_snapshot_total_biomass(handle: *mut SimHandle) -> f64 {
+    if handle.is_null() { return 0.0; }
+    let h = unsafe { &*handle };
+    h.sim.grid().tiles.iter()
+        .flat_map(|t| t.populations.values())
+        .sum()
+}
+
+#[no_mangle]
+pub extern "C" fn pa_sim_evaluate_objective(
+    handle: *mut SimHandle,
+    objective_json: *const c_char,
+) -> *const c_char {
+    if handle.is_null() || objective_json.is_null() { return ptr::null(); }
+    let h = unsafe { &mut *handle };
+
+    let c_str = unsafe { CStr::from_ptr(objective_json) };
+    let json_str = match c_str.to_str() {
+        Ok(s) => s,
+        Err(_) => return ptr::null(),
+    };
+
+    let objective: crate::level::Objective = match serde_json::from_str(json_str) {
+        Ok(o) => o,
+        Err(_) => return ptr::null(),
+    };
+
+    let total_biomass: f64 = h.sim.grid().tiles.iter()
+        .flat_map(|t| t.populations.values())
+        .sum();
+    let biodiversity = crate::biosphere::biodiversity_count(h.sim.grid(), h.sim.species());
+
+    let condition_met = match &objective {
+        crate::level::Objective::MicrobialStability { min_biomass, .. } => {
+            total_biomass >= *min_biomass
+        }
+        crate::level::Objective::EcosystemStability { min_trophic_levels, .. } => {
+            biodiversity >= *min_trophic_levels
+        }
+        crate::level::Objective::BiodiversityStability { min_species, .. } => {
+            biodiversity >= *min_species
+        }
+    };
+
+    let extinct = total_biomass <= 0.0 && !h.sim.species().is_empty();
+
+    let result = serde_json::json!({
+        "condition_met": condition_met,
+        "total_biomass": total_biomass,
+        "biodiversity": biodiversity,
+        "extinct": extinct,
+    });
+
+    let json = serde_json::to_string(&result).unwrap_or_else(|_| "{}".to_string());
+    h.objective_result_cache = CString::new(json).unwrap_or_else(|_| CString::new("{}").unwrap());
+    h.objective_result_cache.as_ptr()
 }
 
 // --- Species ---

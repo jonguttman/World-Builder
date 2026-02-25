@@ -115,6 +115,42 @@ fn test_save_and_load() {
 }
 
 #[test]
+fn test_total_biomass() {
+    let handle = pa_sim_create(42, ptr::null());
+    pa_sim_step(handle, 500);
+
+    let species_json = CString::new(r#"{"id":0,"name":"Algae","traits":{"temp_optimal":15.0,"temp_range":50.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.05,"dispersal":0.3,"mutation_rate":0.01}}"#).unwrap();
+    pa_sim_add_species_json(handle, species_json.as_ptr(), 100.0);
+    pa_sim_step(handle, 100);
+    pa_sim_snapshot_update(handle);
+
+    let biomass = pa_sim_snapshot_total_biomass(handle);
+    assert!(biomass > 0.0, "Should have non-zero biomass after seeding species, got {}", biomass);
+
+    pa_sim_destroy(handle);
+}
+
+#[test]
+fn test_evaluate_objective() {
+    let handle = pa_sim_create(42, ptr::null());
+    pa_sim_step(handle, 500);
+
+    let species_json = CString::new(r#"{"id":0,"name":"Algae","traits":{"temp_optimal":15.0,"temp_range":50.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.05,"dispersal":0.3,"mutation_rate":0.01}}"#).unwrap();
+    pa_sim_add_species_json(handle, species_json.as_ptr(), 100.0);
+    pa_sim_step(handle, 100);
+
+    let objective_json = CString::new(r#"{"type":"MicrobialStability","min_biomass":100.0,"required_duration_steps":10}"#).unwrap();
+    let result_ptr = pa_sim_evaluate_objective(handle, objective_json.as_ptr());
+    assert!(!result_ptr.is_null());
+
+    let result_str = unsafe { std::ffi::CStr::from_ptr(result_ptr) }.to_str().unwrap();
+    assert!(result_str.contains("condition_met"), "Result should contain condition_met: {}", result_str);
+    assert!(result_str.contains("total_biomass"), "Result should contain total_biomass: {}", result_str);
+
+    pa_sim_destroy(handle);
+}
+
+#[test]
 fn test_null_handle_safety() {
     // All functions should handle null gracefully
     pa_sim_step(ptr::null_mut(), 100);

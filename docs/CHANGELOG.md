@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 - 2026-02-24
+### Sprint 3: Level Play — Objective Evaluation FFI
+- `pa_sim_snapshot_total_biomass` FFI function for querying total biomass across all tiles
+- `pa_sim_evaluate_objective` FFI function for evaluating win/fail conditions from JSON objective
+- `objective_result_cache` field on SimHandle for safe C string lifetime management
+- C header updated with new objective evaluation declarations
+- 2 new FFI tests (49 total Rust tests passing)
+
 ## 0.3.0 - 2026-02-24
 ### Sprint 2: iOS FFI Bridge & Visualization
 - Rust FFI module with C-compatible API (18 extern functions, SimHandle with cached flat arrays)
