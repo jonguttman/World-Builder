@@ -1,31 +1,89 @@
 import SwiftUI
 
 struct PlanetView: View {
-    let levelId: Int
-    let seed: UInt64
-    let paramsJSON: String?
+    let levelId: String
+    @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel = SimulationViewModel()
     @State private var selectedTile: TileInfo?
     @State private var showTileInspector = false
-
-    init(levelId: Int, seed: UInt64 = 7749, paramsJSON: String? = nil) {
-        self.levelId = levelId
-        self.seed = seed
-        self.paramsJSON = paramsJSON
-    }
+    @State private var showBriefing = true
+    @State private var showTutorial = true
+    @State private var tutorialStep = 0
 
     var body: some View {
+        ZStack {
+            simulationView
+
+            if showBriefing, let config = viewModel.levelConfig {
+                LevelBriefingView(config: config) {
+                    showBriefing = false
+                }
+                .background(.ultraThinMaterial)
+            }
+
+            if !showBriefing {
+                TutorialOverlay(
+                    steps: LevelTutorials.level1,
+                    currentStepIndex: $tutorialStep,
+                    isVisible: $showTutorial
+                )
+            }
+
+            if case .won = viewModel.levelStatus {
+                LevelCompleteView(
+                    won: true, failReason: nil,
+                    steps: viewModel.currentStep,
+                    biodiversity: viewModel.biodiversity,
+                    onRestart: { restart() },
+                    onExit: { dismiss() }
+                )
+                .background(.ultraThinMaterial)
+            }
+
+            if case .failed(let reason) = viewModel.levelStatus {
+                LevelCompleteView(
+                    won: false, failReason: reason,
+                    steps: viewModel.currentStep,
+                    biodiversity: viewModel.biodiversity,
+                    onRestart: { restart() },
+                    onExit: { dismiss() }
+                )
+                .background(.ultraThinMaterial)
+            }
+        }
+        .navigationTitle(viewModel.levelConfig?.name ?? "Level")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.startLevel(levelId: levelId)
+        }
+    }
+
+    private var simulationView: some View {
         VStack(spacing: 0) {
             // Status bar
             HStack {
                 Label("\(viewModel.currentStep) yr", systemImage: "clock")
+                Spacer()
+                Label(String(format: "%.0f biomass", viewModel.totalBiomass), systemImage: "microbe")
                 Spacer()
                 Label("\(viewModel.biodiversity) species", systemImage: "leaf")
             }
             .font(.caption)
             .padding(.horizontal)
             .padding(.vertical, 4)
+
+            // Objective progress
+            if viewModel.requiredSteps > 0 {
+                VStack(spacing: 2) {
+                    ProgressView(value: viewModel.objectiveProgress)
+                        .tint(viewModel.objectiveProgress > 0 ? .green : .gray)
+                    Text("Objective: \(Int(viewModel.objectiveProgress * 100))%")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+            }
 
             // Grid
             GridRenderer(
@@ -43,7 +101,26 @@ struct PlanetView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .padding(.horizontal)
 
-            Spacer()
+            // Intervention tray
+            if !viewModel.allowedInterventions.isEmpty {
+                VStack(spacing: 4) {
+                    HStack {
+                        Label(String(format: "Energy: %.0f", viewModel.energyRemaining), systemImage: "bolt.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+
+                    InterventionTray(
+                        allowedInterventions: viewModel.allowedInterventions,
+                        energyRemaining: viewModel.energyRemaining,
+                        onApply: { kind, magnitude in
+                            viewModel.applyIntervention(kind: kind, magnitude: magnitude)
+                        }
+                    )
+                }
+            }
 
             // Overlay picker
             Picker("Overlay", selection: $viewModel.overlayMode) {
@@ -74,17 +151,17 @@ struct PlanetView: View {
             }
             .padding()
         }
-        .navigationTitle("Level \(levelId)")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            viewModel.startLevel(seed: seed, paramsJSON: paramsJSON)
-        }
         .sheet(isPresented: $showTileInspector) {
             if let tile = selectedTile {
                 TileInspectorView(tile: tile)
                     .presentationDetents([.height(200)])
             }
         }
+    }
+
+    private func restart() {
+        viewModel.startLevel(levelId: levelId)
+        showBriefing = true
     }
 }
 
