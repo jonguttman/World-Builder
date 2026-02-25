@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0 - 2026-02-24
+- Replaced placeholder PlanetView with live simulation view using GridRenderer
+- Added status bar showing current simulation step and biodiversity count
+- Integrated overlay picker (temperature, nutrients, moisture, population) via segmented control
+- Added time controls with play/pause button and speed picker (1x, 100x, 10K, 1M)
+- Added TileInspectorView sheet with tile coordinates, terrain type, and stat readouts
+- Tile tap on grid opens inspector with temperature, nutrients, moisture, and population
+- PlanetView now accepts seed and paramsJSON parameters for simulation initialization
+- Updated LevelSelectView NavigationLink to pass seed to PlanetView
+
 ## 0.8.0 - 2026-02-24
 - Canvas-based GridRenderer component for drawing 64x32 tile grid
 - Temperature overlay with cold-to-hot four-stop color gradient (blue -> cyan -> green/yellow -> red)

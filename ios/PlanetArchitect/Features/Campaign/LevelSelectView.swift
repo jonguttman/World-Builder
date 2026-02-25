@@ -20,7 +20,7 @@ struct LevelSelectView: View {
                 Section("Training") {
                     ForEach(levels.filter { $0.pack == .free }, id: \.id) { level in
                         NavigationLink {
-                            PlanetView(levelId: level.id)
+                            PlanetView(levelId: level.id, seed: 7749)
                         } label: {
                             LevelRow(number: level.id, name: level.name, locked: false)
                         }
