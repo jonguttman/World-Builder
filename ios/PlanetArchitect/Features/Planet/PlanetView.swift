@@ -101,7 +101,7 @@ struct PlanetView: View {
                 .padding(.horizontal)
             }
 
-            // Grid
+            // Grid — expands to fill available space
             GridRenderer(
                 data: viewModel.currentOverlayData,
                 oceanMask: viewModel.oceanMask,
@@ -116,6 +116,7 @@ struct PlanetView: View {
             .aspectRatio(2.0, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .padding(.horizontal)
+            .frame(maxHeight: .infinity)
 
             // Intervention tray
             if !viewModel.allowedInterventions.isEmpty {
@@ -167,6 +168,7 @@ struct PlanetView: View {
             }
             .padding()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .sheet(isPresented: $showTileInspector) {
             if let tile = selectedTile {
                 TileInspectorView(tile: tile)

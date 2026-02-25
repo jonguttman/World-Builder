@@ -19,6 +19,14 @@ targets:
           - "**/.gitkeep"
     resources:
       - path: PlanetArchitect/Resources
+    info:
+      path: PlanetArchitect/Info.plist
+      properties:
+        UILaunchScreen: {}
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.planetarchitect.app
@@ -30,7 +38,4 @@ targets:
           - "$(PROJECT_DIR)/../sim-core/target/aarch64-apple-ios/release"
         OTHER_LDFLAGS:
           - "-lplanet_architect_sim"
-        GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "1"
         SWIFT_STRICT_CONCURRENCY: complete
