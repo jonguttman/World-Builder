@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.14.0 - 2026-02-24
+- Created Swift bridge types mirroring Rust data structures in ios/PlanetArchitect/Core/SimulationBridge/SimTypes.swift
+  - PlanetParams, AtmosphereState, HydroState with Earth-like defaults
+  - TimeSpeed enum with stepsPerBatch computed property
+  - Species, SpeciesTraits, TrophicLevel for biosphere model
+  - InterventionKind, RegionTarget, Intervention for player actions
+  - LevelSpec with Pack enum (FREE, PACK_CORE, PACK_ADV)
+  - CodexEntry with CodexCategory enum
+  - SimSnapshot for bridge-layer state transfer
+- Created SwiftUI app shell in ios/PlanetArchitect/PlanetArchitectApp.swift
+  - @main entry point launching LevelSelectView
+- Created LevelSelectView in ios/PlanetArchitect/Features/Campaign/LevelSelectView.swift
+  - NavigationStack with Training (3 free levels) and Core Challenge Pack (7 locked levels) sections
+  - LevelRow component with lock icon for locked levels
+  - Navigation to PlanetView for unlocked levels
+- Created PlanetView in ios/PlanetArchitect/Features/Planet/PlanetView.swift
+  - Placeholder planet visualization with radial gradient circle
+  - Play/Pause button and TimeSpeed segmented picker
+  - Step counter display
+- Removed .gitkeep files from directories now containing Swift sources
+
 ## 0.13.0 - 2026-02-24
 - Created Level 1 headless integration test suite (4 tests) in tests/level1_headless_test.rs
   - test_level1_can_be_loaded_and_started: loads level_01_first_breath.json, deserializes LevelSpec, creates Simulation from starting params and seed, verifies step counter starts at 0
