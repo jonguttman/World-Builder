@@ -102,7 +102,7 @@ impl Simulation {
         climate::update_nutrients(&mut self.grid, &self.params);
         biosphere::update_grid(&mut self.grid, &self.species, &self.params.atmosphere);
 
-        if self.step_count % SPECIATION_EPOCH == 0 {
+        if self.step_count.is_multiple_of(SPECIATION_EPOCH) {
             self.check_speciation();
         }
     }

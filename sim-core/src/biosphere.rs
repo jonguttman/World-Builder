@@ -103,11 +103,11 @@ fn compute_predation(tile: &Tile, prey_species: &Species, all_species: &[Species
     let mut total_consumed = 0.0;
 
     for predator in all_species {
-        let eats_prey = match (&predator.traits.trophic_level, prey_level) {
-            (TrophicLevel::Predator, TrophicLevel::Consumer) => true,
-            (TrophicLevel::Consumer, TrophicLevel::Producer) => true,
-            _ => false,
-        };
+        let eats_prey = matches!(
+            (&predator.traits.trophic_level, prey_level),
+            (TrophicLevel::Predator, TrophicLevel::Consumer)
+                | (TrophicLevel::Consumer, TrophicLevel::Producer)
+        );
 
         if !eats_prey {
             continue;
