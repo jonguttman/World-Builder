@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 - 2026-02-24
+- C header file (`sim-core/include/planet_architect.h`) declaring all 18 FFI functions
+- iOS cross-compilation build script (`sim-core/build-ios.sh`)
+- Verified release builds for `aarch64-apple-ios-sim` (simulator) and `aarch64-apple-ios` (device)
+
 ## 0.3.0 - 2026-02-24
 - FFI module (`sim-core/src/ffi.rs`) with C-compatible API for iOS bridge
 - Opaque `SimHandle` type with cached flat arrays for zero-copy snapshot access
