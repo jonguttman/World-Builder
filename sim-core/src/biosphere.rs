@@ -1,3 +1,6 @@
+use rand::Rng;
+use rand_chacha::ChaCha8Rng;
+
 use crate::types::*;
 
 const EXTINCTION_THRESHOLD: f64 = 0.5;
@@ -151,4 +154,44 @@ pub fn biodiversity_count(grid: &WorldGrid, species: &[Species]) -> u32 {
         .iter()
         .filter(|s| global_population(grid, s.id) > 0.0)
         .count() as u32
+}
+
+/// Nudge a value by a random amount within a range
+fn nudge(val: f32, range: f32, rng: &mut ChaCha8Rng) -> f32 {
+    val + rng.gen_range(-range..range)
+}
+
+/// Slightly mutate species traits
+pub fn mutate_traits(original: &SpeciesTraits, rng: &mut ChaCha8Rng) -> SpeciesTraits {
+    let mut t = original.clone();
+
+    t.temp_optimal = nudge(t.temp_optimal, 3.0, rng);
+    t.temp_range = nudge(t.temp_range, 2.0, rng).max(5.0);
+    t.o2_need = nudge(t.o2_need, 0.02, rng).max(0.0);
+    t.toxin_resistance = nudge(t.toxin_resistance, 0.05, rng).clamp(0.0, 1.0);
+    t.reproduction_rate = nudge(t.reproduction_rate, 0.005, rng).max(0.001);
+    t.dispersal = nudge(t.dispersal, 0.05, rng).clamp(0.0, 1.0);
+    t.mutation_rate = nudge(t.mutation_rate, 0.002, rng).clamp(0.001, 1.0);
+    // trophic_level stays the same
+    t
+}
+
+/// Attempt speciation. Returns Some(new_species) if mutation fires.
+pub fn try_speciate(
+    parent: &Species,
+    new_id: u32,
+    rng: &mut ChaCha8Rng,
+) -> Option<Species> {
+    let roll: f32 = rng.gen();
+    if roll < parent.traits.mutation_rate {
+        let new_traits = mutate_traits(&parent.traits, rng);
+        let name = format!("{}-v{}", parent.name, new_id);
+        Some(Species {
+            id: new_id,
+            name,
+            traits: new_traits,
+        })
+    } else {
+        None
+    }
 }

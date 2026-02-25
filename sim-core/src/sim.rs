@@ -6,6 +6,8 @@ use crate::climate;
 use crate::biosphere;
 use crate::snapshot::SimSnapshot;
 
+const SPECIATION_EPOCH: u64 = 1000;
+
 pub struct Simulation {
     seed: u64,
     rng: ChaCha8Rng,
@@ -81,6 +83,52 @@ impl Simulation {
         climate::update(&mut self.grid, &self.params, self.step_count);
         climate::update_nutrients(&mut self.grid, &self.params);
         biosphere::update_grid(&mut self.grid, &self.species, &self.params.atmosphere);
+
+        if self.step_count % SPECIATION_EPOCH == 0 {
+            self.check_speciation();
+        }
+    }
+
+    fn check_speciation(&mut self) {
+        let mut new_species = Vec::new();
+
+        for species in &self.species {
+            let global_pop = biosphere::global_population(&self.grid, species.id);
+            if global_pop > 500.0 {
+                if let Some(child) = biosphere::try_speciate(
+                    species,
+                    self.next_species_id,
+                    &mut self.rng,
+                ) {
+                    self.events.push(SimEvent::Speciation {
+                        parent_id: species.id,
+                        child_id: child.id,
+                        step: self.step_count,
+                    });
+                    self.next_species_id += 1;
+                    new_species.push(child);
+                }
+            }
+        }
+
+        // Seed new species on tiles where parent exists
+        for child in &new_species {
+            for y in 0..self.grid.height {
+                for x in 0..self.grid.width {
+                    let tile = self.grid.get_mut(x, y);
+                    // Seed child on tiles with any existing population
+                    let has_life = tile.populations.values().any(|&p| p > 10.0);
+                    if has_life {
+                        let suit = biosphere::suitability(&child.traits, tile, &self.params.atmosphere);
+                        if suit > 0.2 {
+                            tile.populations.insert(child.id, 10.0);
+                        }
+                    }
+                }
+            }
+        }
+
+        self.species.extend(new_species);
     }
 
     pub fn snapshot(&self) -> SimSnapshot {

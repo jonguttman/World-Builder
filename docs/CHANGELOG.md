@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.8.0 - 2026-02-24
+- Implemented mutation and speciation engine in sim-core/src/biosphere.rs
+  - mutate_traits: nudges species traits (temp_optimal, temp_range, o2_need, toxin_resistance, reproduction_rate, dispersal, mutation_rate) with clamped random variation
+  - try_speciate: probabilistic speciation roll based on parent's mutation_rate, creates child species with mutated traits
+  - nudge helper function for bounded random trait perturbation
+- Added epoch-based speciation to simulation tick loop in sim-core/src/sim.rs
+  - SPECIATION_EPOCH constant (every 1000 ticks)
+  - check_speciation: evaluates species with global_pop > 500 for speciation, seeds children on habitable tiles with existing life, emits Speciation events
+- Created speciation test suite (2 tests) in tests/speciation_test.rs
+  - Mutated traits stay within valid bounds
+  - High mutation rate reliably produces child species with correct id and distinct name
+
 ## 0.7.0 - 2026-02-24
 - Integrated biosphere into simulation tick loop (sim.rs)
   - biosphere::update_grid called each tick after climate updates
