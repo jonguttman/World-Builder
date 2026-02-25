@@ -19,6 +19,9 @@ pub struct SimHandle {
     ocean_cache: Vec<u8>,
     species_json_cache: CString,
     objective_result_cache: CString,
+    codex_entries_cache: CString,
+    codex_unlocked_cache: CString,
+    codex_new_cache: CString,
 }
 
 impl SimHandle {
@@ -33,6 +36,9 @@ impl SimHandle {
             ocean_cache: vec![0; tile_count],
             species_json_cache: CString::new("[]").unwrap(),
             objective_result_cache: CString::new("{}").unwrap(),
+            codex_entries_cache: CString::new("[]").unwrap(),
+            codex_unlocked_cache: CString::new("[]").unwrap(),
+            codex_new_cache: CString::new("[]").unwrap(),
         };
         handle.update_cache();
         handle
@@ -235,6 +241,38 @@ pub extern "C" fn pa_sim_evaluate_objective(
     let json = serde_json::to_string(&result).unwrap_or_else(|_| "{}".to_string());
     h.objective_result_cache = CString::new(json).unwrap_or_else(|_| CString::new("{}").unwrap());
     h.objective_result_cache.as_ptr()
+}
+
+// --- Codex ---
+
+#[no_mangle]
+pub extern "C" fn pa_sim_codex_all_entries_json(handle: *mut SimHandle) -> *const c_char {
+    if handle.is_null() { return ptr::null(); }
+    let h = unsafe { &mut *handle };
+    let entries = h.sim.codex().entries();
+    let json = serde_json::to_string(entries).unwrap_or_else(|_| "[]".to_string());
+    h.codex_entries_cache = CString::new(json).unwrap_or_else(|_| CString::new("[]").unwrap());
+    h.codex_entries_cache.as_ptr()
+}
+
+#[no_mangle]
+pub extern "C" fn pa_sim_codex_unlocked_json(handle: *mut SimHandle) -> *const c_char {
+    if handle.is_null() { return ptr::null(); }
+    let h = unsafe { &mut *handle };
+    let ids = h.sim.codex().unlocked_ids();
+    let json = serde_json::to_string(&ids).unwrap_or_else(|_| "[]".to_string());
+    h.codex_unlocked_cache = CString::new(json).unwrap_or_else(|_| CString::new("[]").unwrap());
+    h.codex_unlocked_cache.as_ptr()
+}
+
+#[no_mangle]
+pub extern "C" fn pa_sim_codex_new_unlocks_json(handle: *mut SimHandle) -> *const c_char {
+    if handle.is_null() { return ptr::null(); }
+    let h = unsafe { &mut *handle };
+    let new_ids = h.sim.codex_mut().drain_new_unlocks();
+    let json = serde_json::to_string(&new_ids).unwrap_or_else(|_| "[]".to_string());
+    h.codex_new_cache = CString::new(json).unwrap_or_else(|_| CString::new("[]").unwrap());
+    h.codex_new_cache.as_ptr()
 }
 
 // --- Species ---

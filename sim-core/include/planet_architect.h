@@ -33,6 +33,14 @@ const char* pa_sim_snapshot_species_json(PASimHandle handle);
 double pa_sim_snapshot_total_biomass(PASimHandle handle);
 const char* pa_sim_evaluate_objective(PASimHandle handle, const char* objective_json);
 
+// --- Codex ---
+// Returns JSON array of all codex entry definitions.
+const char* pa_sim_codex_all_entries_json(PASimHandle handle);
+// Returns JSON array of unlocked entry ID strings.
+const char* pa_sim_codex_unlocked_json(PASimHandle handle);
+// Returns JSON array of entry IDs unlocked since last call. Clears the buffer.
+const char* pa_sim_codex_new_unlocks_json(PASimHandle handle);
+
 // --- Species ---
 void pa_sim_add_species_json(PASimHandle handle, const char* json, double initial_pop);
 

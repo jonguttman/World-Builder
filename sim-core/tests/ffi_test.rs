@@ -204,3 +204,37 @@ fn test_null_handle_safety() {
     assert!(pa_sim_snapshot_temperatures(ptr::null_mut()).is_null());
     pa_sim_destroy(ptr::null_mut());
 }
+
+#[test]
+fn test_codex_all_entries() {
+    let handle = pa_sim_create(42, ptr::null());
+
+    let ptr = pa_sim_codex_all_entries_json(handle);
+    assert!(!ptr.is_null());
+    let json = unsafe { std::ffi::CStr::from_ptr(ptr) }.to_str().unwrap();
+    assert!(json.contains("species_thermophile"), "Should contain Thermophile entry: {}", &json[..200.min(json.len())]);
+    assert!(json.contains("failure_total_extinction"), "Should contain failure entries");
+
+    pa_sim_destroy(handle);
+}
+
+#[test]
+fn test_codex_unlocked_after_species() {
+    let handle = pa_sim_create(42, ptr::null());
+    pa_sim_step(handle, 500);
+
+    let species_json = CString::new(r#"{"id":0,"name":"Algae","traits":{"temp_optimal":15.0,"temp_range":50.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.05,"dispersal":0.3,"mutation_rate":0.01}}"#).unwrap();
+    pa_sim_add_species_json(handle, species_json.as_ptr(), 100.0);
+
+    // Run past a speciation epoch so codex checks fire
+    pa_sim_step(handle, 1000);
+
+    let ptr = pa_sim_codex_unlocked_json(handle);
+    assert!(!ptr.is_null());
+    let json = unsafe { std::ffi::CStr::from_ptr(ptr) }.to_str().unwrap();
+    // SpeciesAppeared entries should be unlocked
+    assert!(json.contains("species_thermophile") || json.contains("species_planktonic"),
+        "Should have unlocked at least one species entry: {}", json);
+
+    pa_sim_destroy(handle);
+}

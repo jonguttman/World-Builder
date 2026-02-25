@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.6 - 2026-02-25
+### Sprint 4: Codex FFI — JSON Endpoints
+- 3 new FFI functions: `pa_sim_codex_all_entries_json`, `pa_sim_codex_unlocked_json`, `pa_sim_codex_new_unlocks_json`
+- `codex_entries_cache`, `codex_unlocked_cache`, `codex_new_cache` CString fields on SimHandle for safe C string lifetime management
+- C header declarations added to `planet_architect.h`
+- 2 new FFI tests: `test_codex_all_entries`, `test_codex_unlocked_after_species`
+- All 54 Rust tests passing
+
 ## 0.4.5 - 2026-02-25
 ### Sprint 4: Enhanced CodexTracker + Simulation Integration
 - Rewrote `CodexTracker` with full `check_all()` method that evaluates all unlock triggers each SPECIATION_EPOCH
