@@ -1,38 +1,21 @@
 # Changelog
 
-## 0.6.1 - 2026-02-24
-### Sprint 3: Tutorial Overlay
-- `TutorialOverlay` SwiftUI view with step-through tutorial card UI
-- `TutorialStep` model with title and message fields
-- `LevelTutorials` enum with Level 1 tutorial content (4 steps)
-- Material-backed card with Next/Got it navigation and auto-dismiss
-
-## 0.6.0 - 2026-02-24
-### Sprint 3: Briefing & Completion Screens
-- `LevelBriefingView.swift` — pre-level screen showing name, description, objective, allowed tools, and energy budget
-- `LevelCompleteView.swift` — post-level screen showing win/fail state, fail reason, elapsed time, and species count with restart/continue actions
-
-## 0.5.1 - 2026-02-24
-### Sprint 3: Intervention Tray UI
-- `InterventionTray` SwiftUI component with horizontal scrolling intervention buttons
-- Energy cost display and affordability gating (disabled + dimmed when insufficient energy)
-- Mapped intervention kinds to SF Symbols icons and human-readable labels
-- Configurable magnitude per intervention type with cost = magnitude * 5.0
-
-## 0.5.0 - 2026-02-24
-### Sprint 3: Bundle Level JSON + LevelLoader
-- Level 1 JSON (`level_01_first_breath.json`) bundled in iOS app resources
-- `LevelLoader.swift` with `LevelConfig` Codable model and JSON decoding
-- Helper methods `paramsJSON` and `objectiveJSON` for FFI bridge serialization
-- `project.yml` updated with resources section for XcodeGen
-
 ## 0.4.0 - 2026-02-24
-### Sprint 3: Level Play — Objective Evaluation FFI
-- `pa_sim_snapshot_total_biomass` FFI function for querying total biomass across all tiles
-- `pa_sim_evaluate_objective` FFI function for evaluating win/fail conditions from JSON objective
-- `objective_result_cache` field on SimHandle for safe C string lifetime management
-- C header updated with new objective evaluation declarations
-- 2 new FFI tests (49 total Rust tests passing)
+### Sprint 3: Level System & Training Level 1
+- `pa_sim_snapshot_total_biomass` and `pa_sim_evaluate_objective` FFI functions (2 new, 49 total Rust tests)
+- `objective_result_cache` on SimHandle for safe C string lifetime management
+- Level 1 JSON (`level_01_first_breath.json`) bundled in iOS app resources
+- `LevelLoader.swift` with `LevelConfig` Codable model, `paramsJSON` and `objectiveJSON` helpers
+- `SimulationEngine` extended with `totalBiomass` property and `evaluateObjective(json:)` method
+- `SimulationViewModel` rewritten with level loading, objective tracking, energy budget, and intervention dispatch
+- `InterventionTray` UI with horizontal scrolling, SF Symbols, energy cost display, and affordability gating
+- `LevelBriefingView` pre-level screen with objective, allowed tools, and energy budget
+- `LevelCompleteView` post-level screen with win/fail state, stats, restart/continue actions
+- `TutorialOverlay` with step-through tutorial cards (Level 1: 4 steps)
+- `PlanetView` rewritten with full level flow: briefing → simulation → tutorial → win/fail overlays
+- `LevelSelectView` updated with string-based level IDs for JSON loading
+- Objective progress bar with sustained-step tracking
+- iOS simulator build verified (BUILD SUCCEEDED)
 
 ## 0.3.0 - 2026-02-24
 ### Sprint 2: iOS FFI Bridge & Visualization
