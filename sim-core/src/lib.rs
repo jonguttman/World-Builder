@@ -8,4 +8,5 @@ pub mod level;
 pub mod codex;
 pub mod snapshot;
 
+pub use sim::Simulation;
 pub use types::*;

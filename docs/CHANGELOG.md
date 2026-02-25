@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0 - 2026-02-24
+- Implemented deterministic tick loop with seeded ChaCha8 RNG in sim-core/src/sim.rs
+  - Simulation struct with new(), step(), tick(), snapshot(), and accessor methods
+  - Reproducible world generation from any u64 seed
+- Implemented basic climate model in sim-core/src/climate.rs
+  - init_grid: latitude-based temperature, random elevation/moisture/nutrients, radiation shielding
+  - update: per-tick temperature with seasonal variation, lapse rate from elevation, albedo cooling
+- Implemented SimSnapshot in sim-core/src/snapshot.rs for serializable simulation state
+- Added `pub use sim::Simulation` re-export in lib.rs
+- Created determinism integration tests (3 tests) in tests/determinism_test.rs
+  - Same seed produces identical results after 1000 steps
+  - Different seeds produce measurably different worlds
+  - Step counter advances correctly
+
 ## 0.3.0 - 2026-02-24
 - Implemented core data structures in sim-core/src/types.rs
   - PlanetParams with AtmosphereState and HydroState (Earth-like defaults)
