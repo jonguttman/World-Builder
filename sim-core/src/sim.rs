@@ -8,6 +8,11 @@ use crate::snapshot::SimSnapshot;
 
 const SPECIATION_EPOCH: u64 = 1000;
 
+#[derive(Debug)]
+pub enum InterventionError {
+    InvalidRegion,
+}
+
 pub struct Simulation {
     seed: u64,
     rng: ChaCha8Rng,
@@ -153,5 +158,52 @@ impl Simulation {
 
     pub fn params(&self) -> &PlanetParams {
         &self.params
+    }
+
+    pub fn apply_intervention(&mut self, intervention: Intervention) -> Result<(), InterventionError> {
+        match intervention.kind {
+            InterventionKind::AdjustCO2 { delta } => {
+                self.params.atmosphere.co2 = (self.params.atmosphere.co2 + delta).clamp(0.0, 1.0);
+            }
+            InterventionKind::AdjustO2 { delta } => {
+                self.params.atmosphere.o2 = (self.params.atmosphere.o2 + delta).clamp(0.0, 1.0);
+            }
+            InterventionKind::CloudSeeding { magnitude } => {
+                if let Some(region) = &intervention.target_region {
+                    self.apply_to_region(region, |tile| {
+                        tile.moisture = (tile.moisture + magnitude * 0.3).clamp(0.0, 1.0);
+                    });
+                }
+            }
+            InterventionKind::NutrientBloom { magnitude } => {
+                if let Some(region) = &intervention.target_region {
+                    self.apply_to_region(region, |tile| {
+                        tile.nutrients = (tile.nutrients + magnitude).clamp(0.0, 1.0);
+                    });
+                }
+            }
+            InterventionKind::IceMeltPulse { magnitude } => {
+                self.params.hydrology.ice_fraction =
+                    (self.params.hydrology.ice_fraction - magnitude * 0.1).clamp(0.0, 1.0);
+            }
+        }
+        Ok(())
+    }
+
+    fn apply_to_region<F>(&mut self, region: &RegionTarget, mut f: F)
+    where
+        F: FnMut(&mut Tile),
+    {
+        let r = region.radius as isize;
+        for dy in -r..=r {
+            for dx in -r..=r {
+                let x = (region.x as isize + dx) as usize;
+                let y = (region.y as isize + dy) as usize;
+                if x < self.grid.width && y < self.grid.height {
+                    let tile = self.grid.get_mut(x, y);
+                    f(tile);
+                }
+            }
+        }
     }
 }

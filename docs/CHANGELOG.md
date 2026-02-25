@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.0 - 2026-02-24
+- Implemented intervention system in sim-core/src/sim.rs
+  - InterventionError enum for error handling
+  - apply_intervention: dispatches by InterventionKind — AdjustCO2, AdjustO2, CloudSeeding, NutrientBloom, IceMeltPulse
+  - apply_to_region: applies a mutation closure to all tiles within a RegionTarget radius, with safe isize casting for boundary checks
+  - All values clamped to [0.0, 1.0] range
+- Created intervention test suite (4 tests) in tests/intervention_test.rs
+  - CO2 adjustment changes atmosphere by exact delta
+  - O2 adjustment changes atmosphere by exact delta
+  - Nutrient bloom increases nutrients in targeted region
+  - Extreme values are clamped to valid range
+
 ## 0.8.0 - 2026-02-24
 - Implemented mutation and speciation engine in sim-core/src/biosphere.rs
   - mutate_traits: nudges species traits (temp_optimal, temp_range, o2_need, toxin_resistance, reproduction_rate, dispersal, mutation_rate) with clamped random variation
