@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 - 2026-02-24
+- Canvas-based GridRenderer component for drawing 64x32 tile grid
+- Temperature overlay with cold-to-hot four-stop color gradient (blue -> cyan -> green/yellow -> red)
+- Nutrient and moisture overlays with scalar color interpolation
+- Population overlay with ocean/land distinction and intensity-based coloring
+- Tap gesture handling with tile coordinate callback via GeometryReader
+- Half-pixel overlap on tile rects to eliminate sub-pixel gaps
+- Private Comparable.clamped(to:) and Color.components helpers for color blending
+
 ## 0.7.0 - 2026-02-24
 - SimulationViewModel with @Observable and @MainActor for Swift 6 strict concurrency
 - OverlayMode enum for switching between temperature, nutrients, moisture, population views
