@@ -5,7 +5,7 @@ import Foundation
 /// Swift-native access to simulation data.
 ///
 /// `PASimHandle` (C: `typedef void* PASimHandle`) is imported by Swift as
-/// `OpaquePointer?`. All FFI calls go through this opaque pointer.
+/// `UnsafeMutableRawPointer`. All FFI calls go through this pointer.
 ///
 /// Thread safety: marked `@unchecked Sendable` — callers are responsible
 /// for serialising access (e.g. via an actor or serial DispatchQueue).
@@ -14,7 +14,7 @@ final class SimulationEngine: @unchecked Sendable {
     // MARK: - Stored Properties
 
     /// Non-optional handle; we guarantee it's valid from init to deinit.
-    private let handle: OpaquePointer
+    private let handle: UnsafeMutableRawPointer
 
     /// Cached grid dimensions (immutable for the lifetime of a simulation).
     let gridWidth: Int
@@ -29,7 +29,7 @@ final class SimulationEngine: @unchecked Sendable {
     ///   - paramsJSON: Optional JSON string encoding `PlanetParams`.
     /// - Returns: `nil` if the Rust side failed to allocate.
     init?(seed: UInt64, paramsJSON: String? = nil) {
-        let raw: OpaquePointer?
+        let raw: UnsafeMutableRawPointer?
         if let json = paramsJSON {
             raw = json.withCString { pa_sim_create(seed, $0) }
         } else {
@@ -43,7 +43,7 @@ final class SimulationEngine: @unchecked Sendable {
     }
 
     /// Internal initialiser used by `loadState(from:)`.
-    private init(handle: OpaquePointer, width: Int, height: Int) {
+    private init(handle: UnsafeMutableRawPointer, width: Int, height: Int) {
         self.handle    = handle
         self.gridWidth  = width
         self.gridHeight = height

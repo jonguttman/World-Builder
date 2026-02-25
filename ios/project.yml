@@ -28,7 +28,7 @@ targets:
           - "$(PROJECT_DIR)/../sim-core/target/aarch64-apple-ios/release"
         OTHER_LDFLAGS:
           - "-lplanet_architect_sim"
-        INFOPLIST_GENERATION_MODE: GeneratedFile
+        GENERATE_INFOPLIST_FILE: YES
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_STRICT_CONCURRENCY: complete
