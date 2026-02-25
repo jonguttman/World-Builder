@@ -6,6 +6,7 @@ pub mod biosphere;
 pub mod sim;
 pub mod level;
 pub mod codex;
+pub mod codex_entries;
 pub mod snapshot;
 pub mod ffi;
 

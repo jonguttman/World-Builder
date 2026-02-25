@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 - 2026-02-24
+### Sprint 4: 35 Codex Entries with Extended Unlock Triggers
+- New `codex_entries.rs` module with `all_entries()` returning 35 codex entries across 8 categories: Species (8), Body Plans (4), Biomes (5), Planetary Systems (5), Evolutionary Events (5), Failure Modes (4), Rare Phenomena (2), Historic Worlds (2)
+- Extended `UnlockTrigger` enum with 10 new variants: `BiomeCondition`, `ParamThreshold`, `PopulationExplosion`, `TrophicCascade`, `StableEcosystem`, `TotalExtinction`, `RunawayGreenhouse`, `FrozenDeath`, `TrophicCollapse`, `Placeholder`
+- Each entry includes requirements text, scientific facts, flavor text, related entry cross-references, and SF Symbol icon IDs
+
 ## 0.4.1 - 2026-02-24
 ### Sprint 4: EcosystemStability trophic level evaluation
 - `trophic_level_count` function in biosphere.rs counts distinct trophic levels (Producer/Consumer/Predator) with living species

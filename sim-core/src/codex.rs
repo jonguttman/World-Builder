@@ -21,6 +21,16 @@ pub enum UnlockTrigger {
     BiodiversityThreshold { min_species: u32 },
     MassExtinction,
     SpeciationEvent,
+    BiomeCondition { criteria: String, min_tiles: u32 },
+    ParamThreshold { param: String, min_value: f32 },
+    PopulationExplosion { min_population: f64 },
+    TrophicCascade,
+    StableEcosystem { min_duration: u64 },
+    TotalExtinction,
+    RunawayGreenhouse,
+    FrozenDeath,
+    TrophicCollapse,
+    Placeholder,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
