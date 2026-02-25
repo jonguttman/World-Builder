@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 - 2026-02-24
+- SimulationViewModel with @Observable and @MainActor for Swift 6 strict concurrency
+- OverlayMode enum for switching between temperature, nutrients, moisture, population views
+- Simulation loop running at ~30fps with configurable TimeSpeed batching
+- Snapshot refresh pulling grid data from SimulationEngine
+- TileInfo struct and tileInfo(x:y:) inspector method
+- Level startup with 500-step nutrient warm-up and initial Thermophile species seeding
+
 ## 0.6.0 - 2026-02-24
 - Swift `SimulationEngine` wrapper class for Rust FFI (`SimulationEngine.swift`)
 - Type-safe lifecycle management of opaque `PASimHandle` (failable init, deinit cleanup)
