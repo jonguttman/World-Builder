@@ -30,3 +30,6 @@ npm-debug.log*
 
 # Coverage
 coverage/
+
+# Xcode generated project (use xcodegen to regenerate)
+*.xcodeproj/

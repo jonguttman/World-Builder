@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 - 2026-02-24
+- XcodeGen project spec (`ios/project.yml`) with Rust static library linking
+- Bridging header (`PlanetArchitect-Bridging-Header.h`) including `planet_architect.h`
+- iOS 17.0 deployment target, Swift 6.0, strict concurrency enabled
+- Library/header search paths configured for both simulator and device architectures
+- Added `*.xcodeproj/` to `.gitignore` (regenerated via `xcodegen generate`)
+
 ## 0.4.0 - 2026-02-24
 - C header file (`sim-core/include/planet_architect.h`) declaring all 18 FFI functions
 - iOS cross-compilation build script (`sim-core/build-ios.sh`)
