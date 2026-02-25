@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.12.0 - 2026-02-24
+- Implemented codex trigger system in sim-core/src/codex.rs
+  - CodexCategory enum: Species, BodyPlan, Biome, PlanetarySystem, EvolutionaryEvent, FailureMode, RarePhenomenon, HistoricWorld
+  - UnlockTrigger enum with serde tagged variants: SpeciesAppeared, TraitStabilized, BiodiversityThreshold, MassExtinction, SpeciationEvent
+  - CodexEntry struct with id, category, name, trigger, requirement/facts/flavor text, related entries, and icon asset
+  - CodexTracker with idempotent unlock checking (entries unlock at most once)
+  - Trigger check methods: check_species_appeared, check_speciation, check_mass_extinction, check_biodiversity
+- Created codex test suite (2 tests) in tests/codex_test.rs
+  - JSON deserialization of CodexEntry with tagged UnlockTrigger
+  - Tracker unlocks on matching condition and prevents duplicate unlocks
+
 ## 0.11.0 - 2026-02-24
 - Implemented save/load with deterministic RNG state preservation in sim-core/src/sim.rs
   - SimState struct for bincode serialization of full simulation state including ChaCha8Rng
