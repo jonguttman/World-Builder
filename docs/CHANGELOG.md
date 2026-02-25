@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.1 - 2026-02-24
+### Sprint 3: Tutorial Overlay
+- `TutorialOverlay` SwiftUI view with step-through tutorial card UI
+- `TutorialStep` model with title and message fields
+- `LevelTutorials` enum with Level 1 tutorial content (4 steps)
+- Material-backed card with Next/Got it navigation and auto-dismiss
+
+## 0.6.0 - 2026-02-24
+### Sprint 3: Briefing & Completion Screens
+- `LevelBriefingView.swift` — pre-level screen showing name, description, objective, allowed tools, and energy budget
+- `LevelCompleteView.swift` — post-level screen showing win/fail state, fail reason, elapsed time, and species count with restart/continue actions
+
 ## 0.5.1 - 2026-02-24
 ### Sprint 3: Intervention Tray UI
 - `InterventionTray` SwiftUI component with horizontal scrolling intervention buttons
