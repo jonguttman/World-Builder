@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.10.0 - 2026-02-24
+- Implemented level spec deserialization and objective evaluator in sim-core/src/level.rs
+  - LevelSpec struct with Pack enum (FREE, PACK_CORE, PACK_ADV), starting params, energy budget, and objectives
+  - Objective enum with tagged serde variants: MicrobialStability, EcosystemStability, BiodiversityStability
+  - ObjectiveEvaluator with sustained-step tracking, completion, and extinction failure detection
+  - ObjectiveStatus enum: InProgress, Complete, Failed
+- Created Level 1 JSON (levels/level_01_first_breath.json)
+  - Barren rocky planet scenario with thin CO2 atmosphere, frozen oceans, weak magnetic field
+  - MicrobialStability objective: 5000 min biomass sustained for 10M steps
+  - Allowed interventions: AdjustCO2, AdjustO2, NutrientBloom, IceMeltPulse
+- Created level test suite (4 tests) in tests/level_test.rs
+  - JSON deserialization of LevelSpec with null starting_params
+  - Objective not met initially (InProgress)
+  - Objective met after sustained biomass above threshold
+  - Objective fails on extinction (biomass drops to 0 after progress)
+
 ## 0.9.0 - 2026-02-24
 - Implemented intervention system in sim-core/src/sim.rs
   - InterventionError enum for error handling
