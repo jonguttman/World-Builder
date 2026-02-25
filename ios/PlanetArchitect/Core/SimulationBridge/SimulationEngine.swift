@@ -136,6 +136,36 @@ final class SimulationEngine: @unchecked Sendable {
         json.withCString { pa_sim_apply_intervention_json(handle, $0) } == 0
     }
 
+    // MARK: - Objective Evaluation
+
+    var totalBiomass: Double {
+        pa_sim_snapshot_total_biomass(handle)
+    }
+
+    struct ObjectiveResult {
+        let conditionMet: Bool
+        let totalBiomass: Double
+        let biodiversity: UInt32
+        let extinct: Bool
+    }
+
+    func evaluateObjective(json: String) -> ObjectiveResult? {
+        guard let ptr = json.withCString({ pa_sim_evaluate_objective(handle, $0) }) else {
+            return nil
+        }
+        let str = String(cString: ptr)
+        guard let data = str.data(using: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return ObjectiveResult(
+            conditionMet: dict["condition_met"] as? Bool ?? false,
+            totalBiomass: dict["total_biomass"] as? Double ?? 0,
+            biodiversity: UInt32(dict["biodiversity"] as? Int ?? 0),
+            extinct: dict["extinct"] as? Bool ?? false
+        )
+    }
+
     // MARK: - Save / Load
 
     /// Serialise the full simulation state to `Data`.
