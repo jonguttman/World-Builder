@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 - 2026-02-24
+- Swift `SimulationEngine` wrapper class for Rust FFI (`SimulationEngine.swift`)
+- Type-safe lifecycle management of opaque `PASimHandle` (failable init, deinit cleanup)
+- Swift-native accessors for snapshot data (temperatures, nutrients, moisture, population, ocean mask)
+- Species introduction and intervention APIs with JSON bridge
+- Save/load support serialising full simulation state to/from `Data`
+- Marked `@unchecked Sendable` for actor/queue-based concurrency
+
 ## 0.5.0 - 2026-02-24
 - XcodeGen project spec (`ios/project.yml`) with Rust static library linking
 - Bridging header (`PlanetArchitect-Bridging-Header.h`) including `planet_architect.h`
