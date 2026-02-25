@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0 - 2026-02-24
+- Created Level 1 headless integration test suite (4 tests) in tests/level1_headless_test.rs
+  - test_level1_can_be_loaded_and_started: loads level_01_first_breath.json, deserializes LevelSpec, creates Simulation from starting params and seed, verifies step counter starts at 0
+  - test_level1_determinism_across_runs: two identical simulations with same seed, species, and 5000 steps produce bit-identical populations
+  - test_level1_microbes_can_survive: simulates player interventions (CO2 boost, ice melt, core heat) on Level 1's harsh starting conditions, warms up nutrients for 500 steps, seeds Extremophile microbes, verifies population > 0 after 10k steps and biodiversity >= 1
+  - test_level1_objective_evaluator_integration: verifies ObjectiveEvaluator starts InProgress, accumulates sustained steps when biomass exceeds threshold, confirms sustained_steps >= 20 after 20 evaluations
+
 ## 0.12.0 - 2026-02-24
 - Implemented codex trigger system in sim-core/src/codex.rs
   - CodexCategory enum: Species, BodyPlan, Biome, PlanetarySystem, EvolutionaryEvent, FailureMode, RarePhenomenon, HistoricWorld
