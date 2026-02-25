@@ -136,8 +136,9 @@ fn compute_predation(tile: &Tile, prey_species: &Species, all_species: &[Species
     total_consumed
 }
 
-/// Update all biosphere populations across the grid
-pub fn update_grid(grid: &mut WorldGrid, species: &[Species], params: &PlanetParams) {
+/// Update all biosphere populations across the grid.
+/// Returns species IDs that went globally extinct this tick.
+pub fn update_grid(grid: &mut WorldGrid, species: &[Species], params: &PlanetParams) -> Vec<u32> {
     let height = grid.height;
     let width = grid.width;
 
@@ -147,6 +148,12 @@ pub fn update_grid(grid: &mut WorldGrid, species: &[Species], params: &PlanetPar
             update_tile_populations(tile, species, params);
         }
     }
+
+    // Check for newly extinct species (global pop == 0)
+    species.iter()
+        .filter(|s| global_population(grid, s.id) <= 0.0)
+        .map(|s| s.id)
+        .collect()
 }
 
 /// Count total global population of a species across the grid

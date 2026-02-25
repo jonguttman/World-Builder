@@ -100,7 +100,36 @@ impl Simulation {
         self.step_count += 1;
         climate::update(&mut self.grid, &self.params, self.step_count);
         climate::update_nutrients(&mut self.grid, &self.params);
-        biosphere::update_grid(&mut self.grid, &self.species, &self.params);
+
+        // Track species alive before update
+        let alive_before: Vec<u32> = self.species.iter()
+            .filter(|s| biosphere::global_population(&self.grid, s.id) > 0.0)
+            .map(|s| s.id)
+            .collect();
+
+        let extinct_ids = biosphere::update_grid(&mut self.grid, &self.species, &self.params);
+
+        // Emit extinction events for species that were alive before but now extinct
+        let newly_extinct: Vec<u32> = extinct_ids.iter()
+            .filter(|id| alive_before.contains(id))
+            .cloned()
+            .collect();
+
+        for &sp_id in &newly_extinct {
+            self.events.push(SimEvent::SpeciesExtinct {
+                species_id: sp_id,
+                step: self.step_count,
+            });
+        }
+
+        // Mass extinction: >50% of living species go extinct in one tick
+        if !alive_before.is_empty() && newly_extinct.len() > alive_before.len() / 2 {
+            let survivors = alive_before.len() - newly_extinct.len();
+            self.events.push(SimEvent::MassExtinction {
+                survivors,
+                step: self.step_count,
+            });
+        }
 
         if self.step_count.is_multiple_of(SPECIATION_EPOCH) {
             self.check_speciation();
@@ -201,6 +230,10 @@ impl Simulation {
 
     pub fn params(&self) -> &PlanetParams {
         &self.params
+    }
+
+    pub fn events(&self) -> &[SimEvent] {
+        &self.events
     }
 
     pub fn apply_intervention(&mut self, intervention: Intervention) -> Result<(), InterventionError> {

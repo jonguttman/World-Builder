@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.4 - 2026-02-24
+### Sprint 4: SimEvent emission for extinction
+- `biosphere::update_grid` now returns `Vec<u32>` of species IDs that went globally extinct this tick
+- `Simulation::tick()` tracks alive species before/after update, emits `SimEvent::SpeciesExtinct` for each newly extinct species
+- Mass extinction detection: emits `SimEvent::MassExtinction` when >50% of living species go extinct in one tick
+- New `Simulation::events()` accessor returns `&[SimEvent]`
+- All 52 Rust tests passing
+
 ## 0.4.3 - 2026-02-24
 ### Sprint 4: AdjustCurrents + AdjustSalinity interventions
 - `AdjustCurrents { delta }` and `AdjustSalinity { delta }` variants added to `InterventionKind`
