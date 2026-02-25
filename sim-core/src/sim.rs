@@ -3,6 +3,7 @@ use rand_chacha::ChaCha8Rng;
 
 use crate::types::*;
 use crate::climate;
+use crate::biosphere;
 use crate::snapshot::SimSnapshot;
 
 pub struct Simulation {
@@ -45,10 +46,41 @@ impl Simulation {
         }
     }
 
+    /// Add a species and seed it on habitable tiles
+    pub fn add_species(&mut self, species: Species, initial_pop_per_tile: f64) {
+        let id = species.id;
+        self.species.push(species.clone());
+
+        // Seed on tiles where suitability > 0.3
+        for y in 0..self.grid.height {
+            for x in 0..self.grid.width {
+                let tile = self.grid.get_mut(x, y);
+                let suit = crate::biosphere::suitability(
+                    &species.traits,
+                    tile,
+                    &self.params.atmosphere,
+                );
+                if suit > 0.3 {
+                    tile.populations.insert(id, initial_pop_per_tile);
+                }
+            }
+        }
+
+        self.events.push(SimEvent::SpeciesAppeared {
+            species_id: id,
+            step: self.step_count,
+        });
+
+        if id >= self.next_species_id {
+            self.next_species_id = id + 1;
+        }
+    }
+
     fn tick(&mut self) {
         self.step_count += 1;
         climate::update(&mut self.grid, &self.params, self.step_count);
         climate::update_nutrients(&mut self.grid, &self.params);
+        biosphere::update_grid(&mut self.grid, &self.species, &self.params.atmosphere);
     }
 
     pub fn snapshot(&self) -> SimSnapshot {

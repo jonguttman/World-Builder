@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0 - 2026-02-24
+- Integrated biosphere into simulation tick loop (sim.rs)
+  - biosphere::update_grid called each tick after climate updates
+  - Added `use crate::biosphere` import
+- Added `add_species` method to Simulation
+  - Seeds initial population on tiles with suitability > 0.3
+  - Emits SpeciesAppeared event and tracks next_species_id
+- Created biosphere integration test suite (2 tests) in tests/integration_test.rs
+  - Seeded microbes grow over time with nutrient warm-up
+  - Food web coexistence: producers and consumers both survive
+
 ## 0.6.0 - 2026-02-24
 - Implemented biosphere microbe model in sim-core/src/biosphere.rs
   - suitability: gaussian temperature falloff, O2 need, toxin resistance, nutrient availability
