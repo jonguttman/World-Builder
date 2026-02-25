@@ -9,11 +9,31 @@ enum OverlayMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+enum LevelStatus: Equatable {
+    case playing
+    case won
+    case failed(reason: String)
+}
+
 @MainActor
 @Observable
 final class SimulationViewModel {
     // Engine
     private(set) var engine: SimulationEngine?
+
+    // Level config
+    private(set) var levelConfig: LevelConfig?
+    private var objectiveJSON: String?
+
+    // Objective tracking
+    private(set) var levelStatus: LevelStatus = .playing
+    private(set) var sustainedSteps: UInt64 = 0
+    private(set) var requiredSteps: UInt64 = 0
+    private(set) var totalBiomass: Double = 0
+
+    // Energy budget
+    private(set) var energyRemaining: Float = 0
+    var allowedInterventions: [String] { levelConfig?.allowedInterventions ?? [] }
 
     // State
     private(set) var currentStep: UInt64 = 0
@@ -44,10 +64,24 @@ final class SimulationViewModel {
         }
     }
 
+    var objectiveProgress: Double {
+        guard requiredSteps > 0 else { return 0 }
+        return Double(sustainedSteps) / Double(requiredSteps)
+    }
+
     // MARK: - Lifecycle
 
-    func startLevel(seed: UInt64, paramsJSON: String? = nil) {
-        engine = SimulationEngine(seed: seed, paramsJSON: paramsJSON)
+    func startLevel(levelId: String) {
+        guard let config = LevelLoader.load(levelId: levelId) else { return }
+        self.levelConfig = config
+        self.objectiveJSON = LevelLoader.objectiveJSON(from: config)
+        self.energyRemaining = config.energyBudget
+        self.requiredSteps = config.objective.requiredDurationSteps
+        self.levelStatus = .playing
+        self.sustainedSteps = 0
+
+        let paramsJSON = LevelLoader.paramsJSON(from: config)
+        engine = SimulationEngine(seed: config.startingSeed, paramsJSON: paramsJSON)
 
         // Warm up nutrients
         engine?.step(500)
@@ -60,9 +94,20 @@ final class SimulationViewModel {
         refreshSnapshot()
     }
 
+    func startLevel(seed: UInt64, paramsJSON: String? = nil) {
+        engine = SimulationEngine(seed: seed, paramsJSON: paramsJSON)
+        engine?.step(500)
+        let microbeJSON = """
+        {"id":0,"name":"Thermophile","traits":{"temp_optimal":5.0,"temp_range":60.0,"o2_need":0.0,"toxin_resistance":0.3,"trophic_level":"Producer","reproduction_rate":0.04,"dispersal":0.3,"mutation_rate":0.005}}
+        """
+        engine?.addSpecies(json: microbeJSON, initialPopulation: 100.0)
+        refreshSnapshot()
+    }
+
     // MARK: - Simulation Control
 
     func togglePause() {
+        guard levelStatus == .playing else { return }
         isPaused.toggle()
         if isPaused {
             simulationTask?.cancel()
@@ -83,9 +128,10 @@ final class SimulationViewModel {
     }
 
     private func tick() {
-        guard let engine else { return }
+        guard let engine, levelStatus == .playing else { return }
         engine.step(timeSpeed.stepsPerBatch)
         refreshSnapshot()
+        evaluateObjective()
     }
 
     func refreshSnapshot() {
@@ -93,11 +139,66 @@ final class SimulationViewModel {
         engine.updateSnapshot()
         currentStep = engine.currentStep
         biodiversity = engine.biodiversityCount
+        totalBiomass = engine.totalBiomass
         temperatures = engine.temperatures
         nutrients = engine.nutrients
         moisture = engine.moisture
         populationDensity = engine.populationDensity
         oceanMask = engine.oceanMask
+    }
+
+    // MARK: - Objective Evaluation
+
+    private func evaluateObjective() {
+        guard let engine, let objJSON = objectiveJSON else { return }
+
+        if let result = engine.evaluateObjective(json: objJSON) {
+            if result.extinct {
+                levelStatus = .failed(reason: "All life has gone extinct.")
+                isPaused = true
+                simulationTask?.cancel()
+                return
+            }
+
+            if result.conditionMet {
+                sustainedSteps += timeSpeed.stepsPerBatch
+            } else {
+                sustainedSteps = 0
+            }
+
+            if sustainedSteps >= requiredSteps {
+                levelStatus = .won
+                isPaused = true
+                simulationTask?.cancel()
+            }
+        }
+    }
+
+    // MARK: - Interventions
+
+    func applyIntervention(kind: String, magnitude: Float) {
+        guard let engine, levelStatus == .playing else { return }
+
+        let energyCost: Float = magnitude * 5.0
+        guard energyRemaining >= energyCost else { return }
+
+        let json: String
+        switch kind {
+        case "AdjustCO2":
+            json = #"{"kind":{"AdjustCO2":{"delta":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
+        case "AdjustO2":
+            json = #"{"kind":{"AdjustO2":{"delta":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
+        case "NutrientBloom":
+            json = #"{"kind":{"NutrientBloom":{"magnitude":\#(magnitude)}},"target_region":{"x":32,"y":16,"radius":10},"step":\#(currentStep)}"#
+        case "IceMeltPulse":
+            json = #"{"kind":{"IceMeltPulse":{"magnitude":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
+        default:
+            return
+        }
+
+        if engine.applyIntervention(json: json) {
+            energyRemaining -= energyCost
+        }
     }
 
     // MARK: - Tile Inspector
