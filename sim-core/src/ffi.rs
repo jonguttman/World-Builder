@@ -208,13 +208,14 @@ pub extern "C" fn pa_sim_evaluate_objective(
         .flat_map(|t| t.populations.values())
         .sum();
     let biodiversity = crate::biosphere::biodiversity_count(h.sim.grid(), h.sim.species());
+    let trophic_levels = crate::biosphere::trophic_level_count(h.sim.grid(), h.sim.species());
 
     let condition_met = match &objective {
         crate::level::Objective::MicrobialStability { min_biomass, .. } => {
             total_biomass >= *min_biomass
         }
         crate::level::Objective::EcosystemStability { min_trophic_levels, .. } => {
-            biodiversity >= *min_trophic_levels
+            trophic_levels >= *min_trophic_levels
         }
         crate::level::Objective::BiodiversityStability { min_species, .. } => {
             biodiversity >= *min_species
@@ -227,6 +228,7 @@ pub extern "C" fn pa_sim_evaluate_objective(
         "condition_met": condition_met,
         "total_biomass": total_biomass,
         "biodiversity": biodiversity,
+        "trophic_levels": trophic_levels,
         "extinct": extinct,
     });
 

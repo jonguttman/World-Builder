@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 - 2026-02-24
+### Sprint 4: EcosystemStability trophic level evaluation
+- `trophic_level_count` function in biosphere.rs counts distinct trophic levels (Producer/Consumer/Predator) with living species
+- `EcosystemStability` objective now evaluates against actual trophic level count instead of biodiversity count
+- `trophic_levels` field added to objective evaluation JSON result
+- New FFI test `test_evaluate_ecosystem_stability_objective` (11 FFI tests total)
+
 ## 0.4.0 - 2026-02-24
 ### Sprint 3: Level System & Training Level 1
 - `pa_sim_snapshot_total_biomass` and `pa_sim_evaluate_objective` FFI functions (2 new, 49 total Rust tests)

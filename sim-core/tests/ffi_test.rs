@@ -151,6 +151,50 @@ fn test_evaluate_objective() {
 }
 
 #[test]
+fn test_evaluate_ecosystem_stability_objective() {
+    let handle = pa_sim_create(42, ptr::null());
+    pa_sim_step(handle, 500);
+
+    let producer = CString::new(r#"{"id":0,"name":"Algae","traits":{"temp_optimal":15.0,"temp_range":50.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.05,"dispersal":0.3,"mutation_rate":0.01}}"#).unwrap();
+    pa_sim_add_species_json(handle, producer.as_ptr(), 200.0);
+
+    let consumer = CString::new(r#"{"id":1,"name":"Grazer","traits":{"temp_optimal":15.0,"temp_range":40.0,"o2_need":0.05,"toxin_resistance":0.2,"trophic_level":"Consumer","reproduction_rate":0.03,"dispersal":0.3,"mutation_rate":0.01}}"#).unwrap();
+    pa_sim_add_species_json(handle, consumer.as_ptr(), 50.0);
+
+    let predator = CString::new(r#"{"id":2,"name":"Hunter","traits":{"temp_optimal":15.0,"temp_range":35.0,"o2_need":0.08,"toxin_resistance":0.15,"trophic_level":"Predator","reproduction_rate":0.015,"dispersal":0.2,"mutation_rate":0.005}}"#).unwrap();
+    pa_sim_add_species_json(handle, predator.as_ptr(), 15.0);
+
+    pa_sim_step(handle, 100);
+
+    let objective = CString::new(r#"{"type":"EcosystemStability","min_trophic_levels":3,"required_duration_steps":10}"#).unwrap();
+    let result_ptr = pa_sim_evaluate_objective(handle, objective.as_ptr());
+    assert!(!result_ptr.is_null());
+
+    let result_str = unsafe { std::ffi::CStr::from_ptr(result_ptr) }.to_str().unwrap();
+    assert!(result_str.contains("trophic_levels"), "Should contain trophic_levels: {}", result_str);
+
+    pa_sim_destroy(handle);
+}
+
+#[test]
+fn test_adjust_currents_intervention() {
+    let handle = pa_sim_create(42, ptr::null());
+    let json = CString::new(r#"{"kind":{"AdjustCurrents":{"delta":0.3}},"target_region":null,"step":0}"#).unwrap();
+    let result = pa_sim_apply_intervention_json(handle, json.as_ptr());
+    assert_eq!(result, 0, "AdjustCurrents should succeed");
+    pa_sim_destroy(handle);
+}
+
+#[test]
+fn test_adjust_salinity_intervention() {
+    let handle = pa_sim_create(42, ptr::null());
+    let json = CString::new(r#"{"kind":{"AdjustSalinity":{"delta":0.1}},"target_region":null,"step":0}"#).unwrap();
+    let result = pa_sim_apply_intervention_json(handle, json.as_ptr());
+    assert_eq!(result, 0, "AdjustSalinity should succeed");
+    pa_sim_destroy(handle);
+}
+
+#[test]
 fn test_null_handle_safety() {
     // All functions should handle null gracefully
     pa_sim_step(ptr::null_mut(), 100);

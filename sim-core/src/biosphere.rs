@@ -6,7 +6,9 @@ use crate::types::*;
 const EXTINCTION_THRESHOLD: f64 = 0.5;
 
 /// How suitable a tile is for a species (0.0–1.0)
-pub fn suitability(traits: &SpeciesTraits, tile: &Tile, atmo: &AtmosphereState) -> f32 {
+pub fn suitability(traits: &SpeciesTraits, tile: &Tile, params: &PlanetParams) -> f32 {
+    let atmo = &params.atmosphere;
+
     // Temperature suitability: gaussian-like falloff from optimal
     let temp_diff = (tile.temperature - traits.temp_optimal).abs();
     let temp_suit = if traits.temp_range > 0.0 {
@@ -35,12 +37,19 @@ pub fn suitability(traits: &SpeciesTraits, tile: &Tile, atmo: &AtmosphereState) 
         _ => 1.0,
     };
 
-    (temp_suit * o2_suit * tox_suit * nutrient_suit).clamp(0.0, 1.0)
+    // Salinity factor for ocean tiles
+    let salinity_suit = if tile.is_ocean {
+        (1.0 - params.hydrology.salinity * (1.0 - traits.toxin_resistance)).max(0.0)
+    } else {
+        1.0
+    };
+
+    (temp_suit * o2_suit * tox_suit * nutrient_suit * salinity_suit).clamp(0.0, 1.0)
 }
 
 /// Carrying capacity for a species on a tile
-pub fn carrying_capacity(traits: &SpeciesTraits, tile: &Tile, atmo: &AtmosphereState) -> f64 {
-    let suit = suitability(traits, tile, atmo) as f64;
+pub fn carrying_capacity(traits: &SpeciesTraits, tile: &Tile, params: &PlanetParams) -> f64 {
+    let suit = suitability(traits, tile, params) as f64;
     let base_capacity = match traits.trophic_level {
         TrophicLevel::Producer => 10_000.0,
         TrophicLevel::Consumer => 1_000.0,
@@ -53,7 +62,7 @@ pub fn carrying_capacity(traits: &SpeciesTraits, tile: &Tile, atmo: &AtmosphereS
 pub fn update_tile_populations(
     tile: &mut Tile,
     species_list: &[Species],
-    atmo: &AtmosphereState,
+    params: &PlanetParams,
 ) {
     let present_ids: Vec<u32> = tile.populations.keys().cloned().collect();
 
@@ -68,8 +77,8 @@ pub fn update_tile_populations(
             continue;
         }
 
-        let suit = suitability(&species.traits, tile, atmo) as f64;
-        let capacity = carrying_capacity(&species.traits, tile, atmo);
+        let suit = suitability(&species.traits, tile, params) as f64;
+        let capacity = carrying_capacity(&species.traits, tile, params);
 
         let r = species.traits.reproduction_rate as f64;
         let growth = if capacity > 0.0 {
@@ -128,14 +137,14 @@ fn compute_predation(tile: &Tile, prey_species: &Species, all_species: &[Species
 }
 
 /// Update all biosphere populations across the grid
-pub fn update_grid(grid: &mut WorldGrid, species: &[Species], atmo: &AtmosphereState) {
+pub fn update_grid(grid: &mut WorldGrid, species: &[Species], params: &PlanetParams) {
     let height = grid.height;
     let width = grid.width;
 
     for y in 0..height {
         for x in 0..width {
             let tile = grid.get_mut(x, y);
-            update_tile_populations(tile, species, atmo);
+            update_tile_populations(tile, species, params);
         }
     }
 }
@@ -194,4 +203,23 @@ pub fn try_speciate(
     } else {
         None
     }
+}
+
+/// Count distinct trophic levels with at least one living species
+pub fn trophic_level_count(grid: &WorldGrid, species: &[Species]) -> u32 {
+    let mut has_producer = false;
+    let mut has_consumer = false;
+    let mut has_predator = false;
+
+    for s in species {
+        if global_population(grid, s.id) > 0.0 {
+            match s.traits.trophic_level {
+                TrophicLevel::Producer => has_producer = true,
+                TrophicLevel::Consumer => has_consumer = true,
+                TrophicLevel::Predator => has_predator = true,
+            }
+        }
+    }
+
+    has_producer as u32 + has_consumer as u32 + has_predator as u32
 }
