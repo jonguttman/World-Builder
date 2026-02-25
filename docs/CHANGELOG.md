@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.3 - 2026-02-24
+### Sprint 4: AdjustCurrents + AdjustSalinity interventions
+- `AdjustCurrents { delta }` and `AdjustSalinity { delta }` variants added to `InterventionKind`
+- `apply_intervention` handles new variants with clamped hydrology parameter updates
+- `suitability()`, `carrying_capacity()`, `update_tile_populations()`, `update_grid()` signatures changed from `&AtmosphereState` to `&PlanetParams`
+- Salinity suitability factor for ocean tiles: reduces fitness based on salinity vs toxin resistance
+- 2 new FFI tests (`test_adjust_currents_intervention`, `test_adjust_salinity_intervention`); 52 total Rust tests passing
+
 ## 0.4.2 - 2026-02-24
 ### Sprint 4: 35 Codex Entries with Extended Unlock Triggers
 - New `codex_entries.rs` module with `all_entries()` returning 35 codex entries across 8 categories: Species (8), Body Plans (4), Biomes (5), Planetary Systems (5), Evolutionary Events (5), Failure Modes (4), Rare Phenomena (2), Historic Worlds (2)

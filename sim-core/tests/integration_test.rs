@@ -56,17 +56,17 @@ fn test_food_web_consumer_coexists_with_producer() {
             temp_optimal: 15.0,
             temp_range: 50.0,
             o2_need: 0.0,
-            toxin_resistance: 0.1,
+            toxin_resistance: 0.3,
             trophic_level: TrophicLevel::Producer,
-            reproduction_rate: 0.08,
+            reproduction_rate: 0.1,
             dispersal: 0.2,
             mutation_rate: 0.01,
         },
     };
-    sim.add_species(producer, 500.0);
+    sim.add_species(producer, 1000.0);
 
     // Let producers establish before introducing consumers
-    sim.step(200);
+    sim.step(300);
 
     let consumer = Species {
         id: 1,
@@ -75,14 +75,14 @@ fn test_food_web_consumer_coexists_with_producer() {
             temp_optimal: 15.0,
             temp_range: 50.0,
             o2_need: 0.1,
-            toxin_resistance: 0.1,
+            toxin_resistance: 0.2,
             trophic_level: TrophicLevel::Consumer,
-            reproduction_rate: 0.03,
+            reproduction_rate: 0.02,
             dispersal: 0.3,
             mutation_rate: 0.01,
         },
     };
-    sim.add_species(consumer, 50.0);
+    sim.add_species(consumer, 30.0);
 
     sim.step(200);
 

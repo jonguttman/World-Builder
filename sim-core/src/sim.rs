@@ -78,7 +78,7 @@ impl Simulation {
                 let suit = crate::biosphere::suitability(
                     &species.traits,
                     tile,
-                    &self.params.atmosphere,
+                    &self.params,
                 );
                 if suit > 0.3 {
                     tile.populations.insert(id, initial_pop_per_tile);
@@ -100,7 +100,7 @@ impl Simulation {
         self.step_count += 1;
         climate::update(&mut self.grid, &self.params, self.step_count);
         climate::update_nutrients(&mut self.grid, &self.params);
-        biosphere::update_grid(&mut self.grid, &self.species, &self.params.atmosphere);
+        biosphere::update_grid(&mut self.grid, &self.species, &self.params);
 
         if self.step_count.is_multiple_of(SPECIATION_EPOCH) {
             self.check_speciation();
@@ -137,7 +137,7 @@ impl Simulation {
                     // Seed child on tiles with any existing population
                     let has_life = tile.populations.values().any(|&p| p > 10.0);
                     if has_life {
-                        let suit = biosphere::suitability(&child.traits, tile, &self.params.atmosphere);
+                        let suit = biosphere::suitability(&child.traits, tile, &self.params);
                         if suit > 0.2 {
                             tile.populations.insert(child.id, 10.0);
                         }
@@ -228,6 +228,14 @@ impl Simulation {
             InterventionKind::IceMeltPulse { magnitude } => {
                 self.params.hydrology.ice_fraction =
                     (self.params.hydrology.ice_fraction - magnitude * 0.1).clamp(0.0, 1.0);
+            }
+            InterventionKind::AdjustCurrents { delta } => {
+                self.params.hydrology.current_strength =
+                    (self.params.hydrology.current_strength + delta).clamp(0.0, 1.0);
+            }
+            InterventionKind::AdjustSalinity { delta } => {
+                self.params.hydrology.salinity =
+                    (self.params.hydrology.salinity + delta).clamp(0.0, 1.0);
             }
         }
         Ok(())

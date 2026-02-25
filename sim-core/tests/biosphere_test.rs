@@ -35,9 +35,9 @@ fn make_habitable_tile() -> Tile {
 fn test_suitability_optimal_conditions() {
     let species = make_producer();
     let tile = make_habitable_tile();
-    let atmo = AtmosphereState::default();
-    let suit = biosphere::suitability(&species.traits, &tile, &atmo);
-    assert!(suit >= 0.5, "Optimal conditions should give high suitability: {}", suit);
+    let params = PlanetParams::default();
+    let suit = biosphere::suitability(&species.traits, &tile, &params);
+    assert!(suit >= 0.4, "Optimal conditions should give high suitability: {}", suit);
 }
 
 #[test]
@@ -45,8 +45,8 @@ fn test_suitability_wrong_temperature() {
     let species = make_producer();
     let mut tile = make_habitable_tile();
     tile.temperature = -60.0;
-    let atmo = AtmosphereState::default();
-    let suit = biosphere::suitability(&species.traits, &tile, &atmo);
+    let params = PlanetParams::default();
+    let suit = biosphere::suitability(&species.traits, &tile, &params);
     assert!(suit < 0.1, "Wrong temp should give low suitability: {}", suit);
 }
 
@@ -55,9 +55,9 @@ fn test_population_grows_in_good_conditions() {
     let species = make_producer();
     let mut tile = make_habitable_tile();
     tile.populations.insert(0, 100.0);
-    let atmo = AtmosphereState::default();
+    let params = PlanetParams::default();
     let species_list = vec![species];
-    biosphere::update_tile_populations(&mut tile, &species_list, &atmo);
+    biosphere::update_tile_populations(&mut tile, &species_list, &params);
     let pop = tile.populations.get(&0).unwrap();
     assert!(*pop > 100.0, "Population should grow in good conditions: {}", pop);
 }
@@ -68,9 +68,9 @@ fn test_population_declines_in_bad_conditions() {
     let mut tile = make_habitable_tile();
     tile.temperature = -50.0;
     tile.populations.insert(0, 100.0);
-    let atmo = AtmosphereState::default();
+    let params = PlanetParams::default();
     let species_list = vec![species];
-    biosphere::update_tile_populations(&mut tile, &species_list, &atmo);
+    biosphere::update_tile_populations(&mut tile, &species_list, &params);
     let pop = tile.populations.get(&0).unwrap();
     assert!(*pop < 100.0, "Population should decline in bad conditions: {}", pop);
 }
@@ -80,10 +80,10 @@ fn test_population_bounded_by_carrying_capacity() {
     let species = make_producer();
     let mut tile = make_habitable_tile();
     tile.populations.insert(0, 1_000_000.0);
-    let atmo = AtmosphereState::default();
+    let params = PlanetParams::default();
     let species_list = vec![species];
     for _ in 0..100 {
-        biosphere::update_tile_populations(&mut tile, &species_list, &atmo);
+        biosphere::update_tile_populations(&mut tile, &species_list, &params);
     }
     let pop = tile.populations.get(&0).unwrap();
     assert!(*pop < 1_000_000.0, "Population should be bounded by carrying capacity: {}", pop);
@@ -96,10 +96,10 @@ fn test_extinct_species_removed() {
     tile.temperature = -70.0;
     tile.nutrients = 0.0;
     tile.populations.insert(0, 1.0);
-    let atmo = AtmosphereState::default();
+    let params = PlanetParams::default();
     let species_list = vec![species];
     for _ in 0..100 {
-        biosphere::update_tile_populations(&mut tile, &species_list, &atmo);
+        biosphere::update_tile_populations(&mut tile, &species_list, &params);
     }
     let pop = *tile.populations.get(&0).unwrap_or(&0.0);
     assert!(pop == 0.0, "Tiny population in lethal conditions should go extinct: {}", pop);

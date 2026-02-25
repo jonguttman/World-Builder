@@ -164,6 +164,8 @@ pub enum InterventionKind {
     CloudSeeding { magnitude: f32 },
     NutrientBloom { magnitude: f32 },
     IceMeltPulse { magnitude: f32 },
+    AdjustCurrents { delta: f32 },
+    AdjustSalinity { delta: f32 },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
