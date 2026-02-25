@@ -17,6 +17,8 @@ targets:
       - path: PlanetArchitect
         excludes:
           - "**/.gitkeep"
+    resources:
+      - path: PlanetArchitect/Resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.planetarchitect.app

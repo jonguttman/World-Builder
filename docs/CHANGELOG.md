@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 - 2026-02-24
+### Sprint 3: Bundle Level JSON + LevelLoader
+- Level 1 JSON (`level_01_first_breath.json`) bundled in iOS app resources
+- `LevelLoader.swift` with `LevelConfig` Codable model and JSON decoding
+- Helper methods `paramsJSON` and `objectiveJSON` for FFI bridge serialization
+- `project.yml` updated with resources section for XcodeGen
+
 ## 0.4.0 - 2026-02-24
 ### Sprint 3: Level Play — Objective Evaluation FFI
 - `pa_sim_snapshot_total_biomass` FFI function for querying total biomass across all tiles
