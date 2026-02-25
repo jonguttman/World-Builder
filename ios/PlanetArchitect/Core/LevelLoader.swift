@@ -39,11 +39,13 @@ struct LevelConfig: Codable {
     struct ObjectiveConfig: Codable {
         let type: String
         let minBiomass: Double?
+        let minTrophicLevels: UInt32?
         let requiredDurationSteps: UInt64
 
         enum CodingKeys: String, CodingKey {
             case type
             case minBiomass = "min_biomass"
+            case minTrophicLevels = "min_trophic_levels"
             case requiredDurationSteps = "required_duration_steps"
         }
     }
@@ -97,6 +99,9 @@ enum LevelLoader {
         ]
         if let minBiomass = obj.minBiomass {
             dict["min_biomass"] = minBiomass
+        }
+        if let minTrophicLevels = obj.minTrophicLevels {
+            dict["min_trophic_levels"] = minTrophicLevels
         }
         guard let data = try? JSONSerialization.data(withJSONObject: dict) else { return nil }
         return String(data: data, encoding: .utf8)

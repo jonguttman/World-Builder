@@ -35,6 +35,9 @@ final class SimulationViewModel {
     private(set) var energyRemaining: Float = 0
     var allowedInterventions: [String] { levelConfig?.allowedInterventions ?? [] }
 
+    // Codex
+    private(set) var newCodexUnlocks: [String] = []
+
     // State
     private(set) var currentStep: UInt64 = 0
     private(set) var biodiversity: UInt32 = 0
@@ -86,11 +89,8 @@ final class SimulationViewModel {
         // Warm up nutrients
         engine?.step(500)
 
-        // Seed initial microbe for Level 1
-        let microbeJSON = """
-        {"id":0,"name":"Thermophile","traits":{"temp_optimal":5.0,"temp_range":60.0,"o2_need":0.0,"toxin_resistance":0.3,"trophic_level":"Producer","reproduction_rate":0.04,"dispersal":0.3,"mutation_rate":0.005}}
-        """
-        engine?.addSpecies(json: microbeJSON, initialPopulation: 100.0)
+        // Seed species based on level
+        seedSpecies(for: config.id)
         refreshSnapshot()
     }
 
@@ -102,6 +102,38 @@ final class SimulationViewModel {
         """
         engine?.addSpecies(json: microbeJSON, initialPopulation: 100.0)
         refreshSnapshot()
+    }
+
+    private func seedSpecies(for levelId: String) {
+        switch levelId {
+        case "level_01":
+            let microbeJSON = """
+            {"id":0,"name":"Thermophile","traits":{"temp_optimal":5.0,"temp_range":60.0,"o2_need":0.0,"toxin_resistance":0.3,"trophic_level":"Producer","reproduction_rate":0.04,"dispersal":0.3,"mutation_rate":0.005}}
+            """
+            engine?.addSpecies(json: microbeJSON, initialPopulation: 100.0)
+
+        case "level_02":
+            let producer = """
+            {"id":0,"name":"Planktonic Algae","traits":{"temp_optimal":18.0,"temp_range":40.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.06,"dispersal":0.5,"mutation_rate":0.01}}
+            """
+            engine?.addSpecies(json: producer, initialPopulation: 200.0)
+
+            let consumer = """
+            {"id":1,"name":"Grazer","traits":{"temp_optimal":16.0,"temp_range":30.0,"o2_need":0.05,"toxin_resistance":0.2,"trophic_level":"Consumer","reproduction_rate":0.03,"dispersal":0.3,"mutation_rate":0.008}}
+            """
+            engine?.addSpecies(json: consumer, initialPopulation: 50.0)
+
+            let predator = """
+            {"id":2,"name":"Apex Filter","traits":{"temp_optimal":17.0,"temp_range":25.0,"o2_need":0.08,"toxin_resistance":0.15,"trophic_level":"Predator","reproduction_rate":0.015,"dispersal":0.2,"mutation_rate":0.005}}
+            """
+            engine?.addSpecies(json: predator, initialPopulation: 15.0)
+
+        default:
+            let microbeJSON = """
+            {"id":0,"name":"Microbe","traits":{"temp_optimal":15.0,"temp_range":50.0,"o2_need":0.0,"toxin_resistance":0.1,"trophic_level":"Producer","reproduction_rate":0.05,"dispersal":0.3,"mutation_rate":0.01}}
+            """
+            engine?.addSpecies(json: microbeJSON, initialPopulation: 100.0)
+        }
     }
 
     // MARK: - Simulation Control
@@ -145,6 +177,12 @@ final class SimulationViewModel {
         moisture = engine.moisture
         populationDensity = engine.populationDensity
         oceanMask = engine.oceanMask
+
+        // Sync codex unlocks
+        if let data = engine.codexUnlockedJSON.data(using: .utf8),
+           let ids = try? JSONDecoder().decode([String].self, from: data) {
+            newCodexUnlocks = ids
+        }
     }
 
     // MARK: - Objective Evaluation
@@ -192,6 +230,10 @@ final class SimulationViewModel {
             json = #"{"kind":{"NutrientBloom":{"magnitude":\#(magnitude)}},"target_region":{"x":32,"y":16,"radius":10},"step":\#(currentStep)}"#
         case "IceMeltPulse":
             json = #"{"kind":{"IceMeltPulse":{"magnitude":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
+        case "AdjustCurrents":
+            json = #"{"kind":{"AdjustCurrents":{"delta":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
+        case "AdjustSalinity":
+            json = #"{"kind":{"AdjustSalinity":{"delta":\#(magnitude)}},"target_region":null,"step":\#(currentStep)}"#
         default:
             return
         }

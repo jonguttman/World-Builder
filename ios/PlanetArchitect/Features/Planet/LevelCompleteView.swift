@@ -5,8 +5,11 @@ struct LevelCompleteView: View {
     let failReason: String?
     let steps: UInt64
     let biodiversity: UInt32
+    let newDiscoveryIds: [String]
     let onRestart: () -> Void
     let onExit: () -> Void
+
+    @State private var showDiscoveries = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -39,6 +42,13 @@ struct LevelCompleteView: View {
             .padding()
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
 
+            if !newDiscoveryIds.isEmpty {
+                Button("View \(newDiscoveryIds.count) New Discoveries") {
+                    showDiscoveries = true
+                }
+                .buttonStyle(.bordered)
+            }
+
             Spacer()
 
             HStack(spacing: 16) {
@@ -54,6 +64,9 @@ struct LevelCompleteView: View {
             }
         }
         .padding()
+        .sheet(isPresented: $showDiscoveries) {
+            NewDiscoveriesSheet(discoveryIds: newDiscoveryIds)
+        }
     }
 
     private func formatSteps(_ steps: UInt64) -> String {

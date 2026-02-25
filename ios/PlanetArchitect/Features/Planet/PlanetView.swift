@@ -3,6 +3,7 @@ import SwiftUI
 struct PlanetView: View {
     let levelId: String
     @Environment(\.dismiss) private var dismiss
+    @Environment(CodexStore.self) private var codexStore
 
     @State private var viewModel = SimulationViewModel()
     @State private var selectedTile: TileInfo?
@@ -10,6 +11,14 @@ struct PlanetView: View {
     @State private var showBriefing = true
     @State private var showTutorial = true
     @State private var tutorialStep = 0
+
+    private var tutorialSteps: [TutorialStep] {
+        switch levelId {
+        case "level_01_first_breath": return LevelTutorials.level1
+        case "level_02_shallow_seas": return LevelTutorials.level2
+        default: return LevelTutorials.level1
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -24,7 +33,7 @@ struct PlanetView: View {
 
             if !showBriefing {
                 TutorialOverlay(
-                    steps: LevelTutorials.level1,
+                    steps: tutorialSteps,
                     currentStepIndex: $tutorialStep,
                     isVisible: $showTutorial
                 )
@@ -35,10 +44,12 @@ struct PlanetView: View {
                     won: true, failReason: nil,
                     steps: viewModel.currentStep,
                     biodiversity: viewModel.biodiversity,
+                    newDiscoveryIds: viewModel.newCodexUnlocks,
                     onRestart: { restart() },
                     onExit: { dismiss() }
                 )
                 .background(.ultraThinMaterial)
+                .onAppear { codexStore.syncUnlocked(from: viewModel.engine?.codexUnlockedJSON ?? "[]") }
             }
 
             if case .failed(let reason) = viewModel.levelStatus {
@@ -46,16 +57,21 @@ struct PlanetView: View {
                     won: false, failReason: reason,
                     steps: viewModel.currentStep,
                     biodiversity: viewModel.biodiversity,
+                    newDiscoveryIds: viewModel.newCodexUnlocks,
                     onRestart: { restart() },
                     onExit: { dismiss() }
                 )
                 .background(.ultraThinMaterial)
+                .onAppear { codexStore.syncUnlocked(from: viewModel.engine?.codexUnlockedJSON ?? "[]") }
             }
         }
         .navigationTitle(viewModel.levelConfig?.name ?? "Level")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.startLevel(levelId: levelId)
+            if codexStore.allEntries.isEmpty, let engine = viewModel.engine {
+                codexStore.loadEntries(from: engine.codexAllEntriesJSON)
+            }
         }
     }
 

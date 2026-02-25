@@ -33,6 +33,8 @@ private struct InterventionButton: View {
         case "NutrientBloom": return "Nutrients"
         case "IceMeltPulse": return "Melt Ice"
         case "CloudSeeding": return "Clouds"
+        case "AdjustCurrents": return "Currents"
+        case "AdjustSalinity": return "Salinity"
         default: return kind
         }
     }
@@ -44,6 +46,8 @@ private struct InterventionButton: View {
         case "NutrientBloom": return "leaf.arrow.circlepath"
         case "IceMeltPulse": return "snowflake"
         case "CloudSeeding": return "cloud.rain"
+        case "AdjustCurrents": return "water.waves"
+        case "AdjustSalinity": return "drop.triangle"
         default: return "wand.and.stars"
         }
     }
@@ -55,6 +59,8 @@ private struct InterventionButton: View {
         case "NutrientBloom": return 0.3
         case "IceMeltPulse": return 0.5
         case "CloudSeeding": return 0.4
+        case "AdjustCurrents": return 0.15
+        case "AdjustSalinity": return 0.05
         default: return 0.1
         }
     }

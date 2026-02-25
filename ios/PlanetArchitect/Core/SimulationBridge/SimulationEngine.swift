@@ -166,6 +166,23 @@ final class SimulationEngine: @unchecked Sendable {
         )
     }
 
+    // MARK: - Codex
+
+    var codexAllEntriesJSON: String {
+        guard let ptr = pa_sim_codex_all_entries_json(handle) else { return "[]" }
+        return String(cString: ptr)
+    }
+
+    var codexUnlockedJSON: String {
+        guard let ptr = pa_sim_codex_unlocked_json(handle) else { return "[]" }
+        return String(cString: ptr)
+    }
+
+    var codexNewUnlocksJSON: String {
+        guard let ptr = pa_sim_codex_new_unlocks_json(handle) else { return "[]" }
+        return String(cString: ptr)
+    }
+
     // MARK: - Save / Load
 
     /// Serialise the full simulation state to `Data`.

@@ -59,6 +59,10 @@ struct LevelBriefingView: View {
             let biomass = obj.minBiomass ?? 0
             let years = obj.requiredDurationSteps
             return "Establish and sustain microbial life (biomass > \(Int(biomass))) for \(formatSteps(years))."
+        case "EcosystemStability":
+            let levels = obj.minTrophicLevels ?? 3
+            let years = obj.requiredDurationSteps
+            return "Maintain a stable ecosystem with \(levels) trophic levels for \(formatSteps(years))."
         default:
             return "Complete the level objective."
         }
@@ -71,6 +75,8 @@ struct LevelBriefingView: View {
         case "NutrientBloom": return "Nutrient Bloom"
         case "IceMeltPulse": return "Ice Melt Pulse"
         case "CloudSeeding": return "Cloud Seeding"
+        case "AdjustCurrents": return "Current Adjustment"
+        case "AdjustSalinity": return "Salinity Adjustment"
         default: return kind
         }
     }

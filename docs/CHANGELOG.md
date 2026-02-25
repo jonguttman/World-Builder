@@ -1,52 +1,21 @@
 # Changelog
 
-## 0.4.6 - 2026-02-25
-### Sprint 4: Codex FFI — JSON Endpoints
+## 0.5.0 - 2026-02-25
+### Sprint 4: Food Web v0 + Level 2 + Codex v1
+- `AdjustCurrents` and `AdjustSalinity` intervention types with salinity suitability factor
+- `SpeciesExtinct` and `MassExtinction` SimEvent emission in tick loop
+- `EcosystemStability` objective refined to check distinct trophic levels
+- 35 codex entries across 8 categories with diverse unlock triggers
+- `CodexTracker` with full `check_all` logic (biomes, params, traits, milestones, failures)
 - 3 new FFI functions: `pa_sim_codex_all_entries_json`, `pa_sim_codex_unlocked_json`, `pa_sim_codex_new_unlocks_json`
-- `codex_entries_cache`, `codex_unlocked_cache`, `codex_new_cache` CString fields on SimHandle for safe C string lifetime management
-- C header declarations added to `planet_architect.h`
-- 2 new FFI tests: `test_codex_all_entries`, `test_codex_unlocked_after_species`
-- All 54 Rust tests passing
-
-## 0.4.5 - 2026-02-25
-### Sprint 4: Enhanced CodexTracker + Simulation Integration
-- Rewrote `CodexTracker` with full `check_all()` method that evaluates all unlock triggers each SPECIATION_EPOCH
-- 10 check methods: species appeared, speciation, mass extinction, biodiversity, param thresholds, biome conditions, population explosions, trait stabilized, stable ecosystem, failure conditions
-- `drain_new_unlocks()` / `restore_unlocked()` API for Swift layer integration
-- `CodexTracker` added as field on `Simulation`, initialized with 35 codex entries, hooked into `tick()` at every SPECIATION_EPOCH
-- `codex()` and `codex_mut()` public accessors on `Simulation`
-- `SimState` save/load now persists and restores codex unlock state
-- Updated codex tests to use new `check_all` + `drain_new_unlocks` public API
-- All 52 Rust tests passing
-
-## 0.4.4 - 2026-02-24
-### Sprint 4: SimEvent emission for extinction
-- `biosphere::update_grid` now returns `Vec<u32>` of species IDs that went globally extinct this tick
-- `Simulation::tick()` tracks alive species before/after update, emits `SimEvent::SpeciesExtinct` for each newly extinct species
-- Mass extinction detection: emits `SimEvent::MassExtinction` when >50% of living species go extinct in one tick
-- New `Simulation::events()` accessor returns `&[SimEvent]`
-- All 52 Rust tests passing
-
-## 0.4.3 - 2026-02-24
-### Sprint 4: AdjustCurrents + AdjustSalinity interventions
-- `AdjustCurrents { delta }` and `AdjustSalinity { delta }` variants added to `InterventionKind`
-- `apply_intervention` handles new variants with clamped hydrology parameter updates
-- `suitability()`, `carrying_capacity()`, `update_tile_populations()`, `update_grid()` signatures changed from `&AtmosphereState` to `&PlanetParams`
-- Salinity suitability factor for ocean tiles: reduces fitness based on salinity vs toxin resistance
-- 2 new FFI tests (`test_adjust_currents_intervention`, `test_adjust_salinity_intervention`); 52 total Rust tests passing
-
-## 0.4.2 - 2026-02-24
-### Sprint 4: 35 Codex Entries with Extended Unlock Triggers
-- New `codex_entries.rs` module with `all_entries()` returning 35 codex entries across 8 categories: Species (8), Body Plans (4), Biomes (5), Planetary Systems (5), Evolutionary Events (5), Failure Modes (4), Rare Phenomena (2), Historic Worlds (2)
-- Extended `UnlockTrigger` enum with 10 new variants: `BiomeCondition`, `ParamThreshold`, `PopulationExplosion`, `TrophicCascade`, `StableEcosystem`, `TotalExtinction`, `RunawayGreenhouse`, `FrozenDeath`, `TrophicCollapse`, `Placeholder`
-- Each entry includes requirements text, scientific facts, flavor text, related entry cross-references, and SF Symbol icon IDs
-
-## 0.4.1 - 2026-02-24
-### Sprint 4: EcosystemStability trophic level evaluation
-- `trophic_level_count` function in biosphere.rs counts distinct trophic levels (Producer/Consumer/Predator) with living species
-- `EcosystemStability` objective now evaluates against actual trophic level count instead of biodiversity count
-- `trophic_levels` field added to objective evaluation JSON result
-- New FFI test `test_evaluate_ecosystem_stability_objective` (11 FFI tests total)
+- Level 2 "Shallow Seas" — ocean world with 3-tier food web (Producer, Consumer, Predator)
+- Level 2 tutorial (4 steps: food web, currents, oscillations, balance)
+- `TabView` app structure with Campaign and Codex tabs
+- `CodexView` with category filter chips, search, locked/unlocked entry rows
+- `CodexEntryView` detail with facts, flavor text, requirements, and cross-linked related entries
+- `CodexStore` with UserDefaults persistence and discovery tracking
+- `NewDiscoveriesSheet` shown after level completion with unlocked entries
+- 54 Rust tests passing, iOS simulator build verified (BUILD SUCCEEDED)
 
 ## 0.4.0 - 2026-02-24
 ### Sprint 3: Level System & Training Level 1

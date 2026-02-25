@@ -47,6 +47,25 @@ struct TutorialStep {
 }
 
 enum LevelTutorials {
+    static let level2: [TutorialStep] = [
+        TutorialStep(
+            title: "The Food Web",
+            message: "This ocean world has three types of life: producers (algae), consumers (grazers), and predators. Each depends on the level below it."
+        ),
+        TutorialStep(
+            title: "Ocean Currents",
+            message: "Strengthen ocean currents to boost nutrient upwelling. More nutrients means more algae, which feeds the whole food chain."
+        ),
+        TutorialStep(
+            title: "Boom and Bust",
+            message: "Watch for population oscillations — too many grazers will crash the algae, then grazers starve, then predators starve. Classic boom-bust cycles."
+        ),
+        TutorialStep(
+            title: "Balance is Key",
+            message: "Use small, careful interventions. Your goal is to keep all three trophic levels alive for 20 million years. Watch the population overlay closely."
+        ),
+    ]
+
     static let level1: [TutorialStep] = [
         TutorialStep(
             title: "Welcome, Architect",

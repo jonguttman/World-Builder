@@ -1,0 +1,34 @@
+{
+    "id": "level_02",
+    "name": "Shallow Seas",
+    "pack": "FREE",
+    "description": "An ocean world with weak currents and sparse nutrients. Establish a stable marine ecosystem with producers, consumers, and predators coexisting for 20 million years.",
+    "starting_seed": 4422,
+    "starting_params": {
+        "gravity": 8.5,
+        "rotation_rate": 0.9,
+        "axial_tilt": 12.0,
+        "core_heat": 0.4,
+        "magnetic_field": 0.5,
+        "atmosphere": {
+            "pressure": 0.8,
+            "o2": 0.10,
+            "co2": 0.03,
+            "toxicity": 0.05
+        },
+        "hydrology": {
+            "ocean_coverage": 0.85,
+            "salinity": 0.04,
+            "current_strength": 0.1,
+            "ice_fraction": 0.15
+        }
+    },
+    "allowed_interventions": ["AdjustCurrents", "NutrientBloom", "AdjustCO2", "AdjustO2", "AdjustSalinity"],
+    "energy_budget": 60.0,
+    "objective": {
+        "type": "EcosystemStability",
+        "min_trophic_levels": 3,
+        "required_duration_steps": 20000000
+    },
+    "fail_conditions": ["Extinction", "TrophicCollapse"]
+}
