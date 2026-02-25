@@ -1,4 +1,5 @@
 use planet_architect_sim::codex::*;
+use planet_architect_sim::types::*;
 
 #[test]
 fn test_codex_entry_deserialization() {
@@ -36,11 +37,19 @@ fn test_codex_tracker_unlocks_on_condition() {
     let mut tracker = CodexTracker::new(vec![entry]);
     assert!(tracker.unlocked_ids().is_empty());
 
-    let unlocks = tracker.check_species_appeared();
+    // Use check_all with events that include a SpeciesAppeared event
+    let grid = WorldGrid::new(2, 2);
+    let species: Vec<Species> = vec![];
+    let params = PlanetParams::default();
+    let events = vec![SimEvent::SpeciesAppeared { species_id: 0, step: 1 }];
+
+    tracker.check_all(&grid, &species, &params, &events, 1000);
+    let unlocks = tracker.drain_new_unlocks();
     assert_eq!(unlocks.len(), 1);
     assert_eq!(unlocks[0], "species_first_life");
 
     // Should not unlock twice
-    let unlocks2 = tracker.check_species_appeared();
+    tracker.check_all(&grid, &species, &params, &events, 2000);
+    let unlocks2 = tracker.drain_new_unlocks();
     assert!(unlocks2.is_empty());
 }

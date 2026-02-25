@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.5 - 2026-02-25
+### Sprint 4: Enhanced CodexTracker + Simulation Integration
+- Rewrote `CodexTracker` with full `check_all()` method that evaluates all unlock triggers each SPECIATION_EPOCH
+- 10 check methods: species appeared, speciation, mass extinction, biodiversity, param thresholds, biome conditions, population explosions, trait stabilized, stable ecosystem, failure conditions
+- `drain_new_unlocks()` / `restore_unlocked()` API for Swift layer integration
+- `CodexTracker` added as field on `Simulation`, initialized with 35 codex entries, hooked into `tick()` at every SPECIATION_EPOCH
+- `codex()` and `codex_mut()` public accessors on `Simulation`
+- `SimState` save/load now persists and restores codex unlock state
+- Updated codex tests to use new `check_all` + `drain_new_unlocks` public API
+- All 52 Rust tests passing
+
 ## 0.4.4 - 2026-02-24
 ### Sprint 4: SimEvent emission for extinction
 - `biosphere::update_grid` now returns `Vec<u32>` of species IDs that went globally extinct this tick

@@ -17,6 +17,7 @@ struct SimState {
     events: Vec<SimEvent>,
     next_species_id: u32,
     rng_state: Vec<u8>,
+    codex_unlocked: Vec<String>,
 }
 
 const SPECIATION_EPOCH: u64 = 1000;
@@ -35,6 +36,7 @@ pub struct Simulation {
     species: Vec<Species>,
     events: Vec<SimEvent>,
     next_species_id: u32,
+    codex: crate::codex::CodexTracker,
 }
 
 impl Simulation {
@@ -43,6 +45,8 @@ impl Simulation {
         let mut grid = WorldGrid::new(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         climate::init_grid(&mut grid, &params, &mut rng);
+
+        let codex = crate::codex::CodexTracker::new(crate::codex_entries::all_entries());
 
         Self {
             seed,
@@ -53,6 +57,7 @@ impl Simulation {
             species: Vec::new(),
             events: Vec::new(),
             next_species_id: 0,
+            codex,
         }
     }
 
@@ -133,6 +138,7 @@ impl Simulation {
 
         if self.step_count.is_multiple_of(SPECIATION_EPOCH) {
             self.check_speciation();
+            self.codex.check_all(&self.grid, &self.species, &self.params, &self.events, self.step_count);
         }
     }
 
@@ -201,6 +207,7 @@ impl Simulation {
             events: self.events.clone(),
             next_species_id: self.next_species_id,
             rng_state: rng_bytes,
+            codex_unlocked: self.codex.unlocked_ids(),
         };
         bincode::serialize(&state)
     }
@@ -208,7 +215,7 @@ impl Simulation {
     pub fn load_state(bytes: &[u8]) -> Result<Self, bincode::Error> {
         let state: SimState = bincode::deserialize(bytes)?;
         let rng: ChaCha8Rng = bincode::deserialize(&state.rng_state)?;
-        Ok(Self {
+        let mut sim = Self {
             seed: state.seed,
             rng,
             step_count: state.step_count,
@@ -217,7 +224,10 @@ impl Simulation {
             species: state.species,
             events: state.events,
             next_species_id: state.next_species_id,
-        })
+            codex: crate::codex::CodexTracker::new(crate::codex_entries::all_entries()),
+        };
+        sim.codex.restore_unlocked(state.codex_unlocked);
+        Ok(sim)
     }
 
     pub fn species(&self) -> &[Species] {
@@ -234,6 +244,14 @@ impl Simulation {
 
     pub fn events(&self) -> &[SimEvent] {
         &self.events
+    }
+
+    pub fn codex(&self) -> &crate::codex::CodexTracker {
+        &self.codex
+    }
+
+    pub fn codex_mut(&mut self) -> &mut crate::codex::CodexTracker {
+        &mut self.codex
     }
 
     pub fn apply_intervention(&mut self, intervention: Intervention) -> Result<(), InterventionError> {
