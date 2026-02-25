@@ -48,6 +48,7 @@ impl Simulation {
     fn tick(&mut self) {
         self.step_count += 1;
         climate::update(&mut self.grid, &self.params, self.step_count);
+        climate::update_nutrients(&mut self.grid, &self.params);
     }
 
     pub fn snapshot(&self) -> SimSnapshot {

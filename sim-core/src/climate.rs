@@ -60,3 +60,32 @@ fn radiation_level(lat: f32, params: &PlanetParams) -> f32 {
     let shielding = params.magnetic_field;
     (base_radiation * (1.0 - shielding * 0.8)).clamp(0.0, 1.0)
 }
+
+/// Update nutrients for one tick
+pub fn update_nutrients(grid: &mut WorldGrid, params: &PlanetParams) {
+    let height = grid.height;
+    let width = grid.width;
+
+    for y in 0..height {
+        for x in 0..width {
+            let tile = grid.get_mut(x, y);
+
+            // Nutrient sources
+            let volcanism = params.core_heat * 0.001;
+            let upwelling = if tile.is_ocean {
+                params.hydrology.current_strength * 0.002
+            } else {
+                0.0
+            };
+
+            // Biomass decay feeds nutrients
+            let decay: f64 = tile.populations.values().sum::<f64>() * 0.0001;
+
+            // Nutrient sinks
+            let leaching = if !tile.is_ocean { tile.moisture * 0.001 } else { 0.0 };
+
+            tile.nutrients = (tile.nutrients + volcanism + upwelling + decay as f32 - leaching)
+                .clamp(0.0, 1.0);
+        }
+    }
+}

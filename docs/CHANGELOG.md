@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 - 2026-02-24
+- Added nutrient cycling model in sim-core/src/climate.rs
+  - update_nutrients: volcanism input, ocean upwelling, biomass decay, moisture leaching
+  - Nutrients clamped to [0.0, 1.0] range per tile per tick
+- Integrated nutrient update into simulation tick loop (sim.rs)
+- Created climate integration test suite (5 tests) in tests/climate_test.rs
+  - Greenhouse effect: higher CO2 raises average temperature
+  - Ice albedo: more ice lowers average temperature
+  - Temperature bounds: extreme params stay within [-80, 80] range
+  - Latitude gradient: equator warmer than poles
+  - Nutrient volcanism: higher core heat increases nutrient levels
+
 ## 0.4.0 - 2026-02-24
 - Implemented deterministic tick loop with seeded ChaCha8 RNG in sim-core/src/sim.rs
   - Simulation struct with new(), step(), tick(), snapshot(), and accessor methods
