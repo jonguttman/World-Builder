@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.0 - 2026-02-24
+- Implemented biosphere microbe model in sim-core/src/biosphere.rs
+  - suitability: gaussian temperature falloff, O2 need, toxin resistance, nutrient availability
+  - carrying_capacity: trophic-level-scaled capacity modulated by suitability and nutrients
+  - update_tile_populations: logistic growth with suitability, mortality, and predation pressure
+  - compute_predation: Holling Type II functional response (Consumer eats Producer, Predator eats Consumer)
+  - update_grid: applies population dynamics across entire WorldGrid
+  - global_population: sums species population across all tiles
+  - biodiversity_count: counts distinct surviving species
+  - Extinction threshold at 0.5 removes tiny populations
+- Created biosphere integration test suite (6 tests) in tests/biosphere_test.rs
+  - Optimal suitability conditions
+  - Wrong temperature reduces suitability
+  - Population growth in good conditions
+  - Population decline in bad conditions
+  - Population bounded by carrying capacity
+  - Extinction of tiny populations in lethal conditions
+
 ## 0.5.0 - 2026-02-24
 - Added nutrient cycling model in sim-core/src/climate.rs
   - update_nutrients: volcanism input, ocean upwelling, biomass decay, moisture leaching
