@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1 - 2026-02-24
+### Sprint 3: Intervention Tray UI
+- `InterventionTray` SwiftUI component with horizontal scrolling intervention buttons
+- Energy cost display and affordability gating (disabled + dimmed when insufficient energy)
+- Mapped intervention kinds to SF Symbols icons and human-readable labels
+- Configurable magnitude per intervention type with cost = magnitude * 5.0
+
 ## 0.5.0 - 2026-02-24
 ### Sprint 3: Bundle Level JSON + LevelLoader
 - Level 1 JSON (`level_01_first_breath.json`) bundled in iOS app resources
