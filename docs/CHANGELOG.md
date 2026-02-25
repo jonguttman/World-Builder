@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 - 2026-02-24
+- Implemented save/load with deterministic RNG state preservation in sim-core/src/sim.rs
+  - SimState struct for bincode serialization of full simulation state including ChaCha8Rng
+  - save_state: serializes Simulation to Vec<u8> via bincode, including RNG state for deterministic resumption
+  - load_state: deserializes bytes back into a fully functional Simulation with restored RNG
+- Enabled serde1 feature on rand_chacha dependency in Cargo.toml
+- Created save/load test suite (2 tests) in tests/saveload_test.rs
+  - Save and load produces identical state (grid tiles, step count)
+  - Loaded simulation continues deterministically (same steps yield same results)
+
 ## 0.10.0 - 2026-02-24
 - Implemented level spec deserialization and objective evaluator in sim-core/src/level.rs
   - LevelSpec struct with Pack enum (FREE, PACK_CORE, PACK_ADV), starting params, energy budget, and objectives

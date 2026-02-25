@@ -1,10 +1,23 @@
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
+use serde::{Deserialize, Serialize};
 
 use crate::types::*;
 use crate::climate;
 use crate::biosphere;
 use crate::snapshot::SimSnapshot;
+
+#[derive(Serialize, Deserialize)]
+struct SimState {
+    seed: u64,
+    step_count: u64,
+    params: PlanetParams,
+    grid: WorldGrid,
+    species: Vec<Species>,
+    events: Vec<SimEvent>,
+    next_species_id: u32,
+    rng_state: Vec<u8>,
+}
 
 const SPECIATION_EPOCH: u64 = 1000;
 
@@ -146,6 +159,36 @@ impl Simulation {
             events: self.events.clone(),
             biodiversity_count: self.species.len() as u32,
         }
+    }
+
+    pub fn save_state(&self) -> Result<Vec<u8>, bincode::Error> {
+        let rng_bytes = bincode::serialize(&self.rng)?;
+        let state = SimState {
+            seed: self.seed,
+            step_count: self.step_count,
+            params: self.params.clone(),
+            grid: self.grid.clone(),
+            species: self.species.clone(),
+            events: self.events.clone(),
+            next_species_id: self.next_species_id,
+            rng_state: rng_bytes,
+        };
+        bincode::serialize(&state)
+    }
+
+    pub fn load_state(bytes: &[u8]) -> Result<Self, bincode::Error> {
+        let state: SimState = bincode::deserialize(bytes)?;
+        let rng: ChaCha8Rng = bincode::deserialize(&state.rng_state)?;
+        Ok(Self {
+            seed: state.seed,
+            rng,
+            step_count: state.step_count,
+            params: state.params,
+            grid: state.grid,
+            species: state.species,
+            events: state.events,
+            next_species_id: state.next_species_id,
+        })
     }
 
     pub fn species(&self) -> &[Species] {
