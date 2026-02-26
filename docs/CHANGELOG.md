@@ -1,10 +1,11 @@
 # Changelog
 
 ## 0.5.1 - 2026-02-25
-### Full-Screen Fix
+### Full-Screen Fix & Level Loading Bug
 - Added `UILaunchScreen` to Info.plist via XcodeGen — eliminates black letterbox bars on modern iPhones
 - Migrated from `GENERATE_INFOPLIST_FILE` to explicit XcodeGen `info:` section for plist management
 - Grid now expands to fill available vertical space with `frame(maxHeight: .infinity)`
+- Fixed level JSON decoding failure caused by conflicting `CodingKeys` + `.convertFromSnakeCase` (BUG-001)
 
 ## 0.5.0 - 2026-02-25
 ### Sprint 4: Food Web v0 + Level 2 + Codex v1

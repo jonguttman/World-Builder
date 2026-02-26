@@ -41,13 +41,6 @@ struct LevelConfig: Codable {
         let minBiomass: Double?
         let minTrophicLevels: UInt32?
         let requiredDurationSteps: UInt64
-
-        enum CodingKeys: String, CodingKey {
-            case type
-            case minBiomass = "min_biomass"
-            case minTrophicLevels = "min_trophic_levels"
-            case requiredDurationSteps = "required_duration_steps"
-        }
     }
 }
 
